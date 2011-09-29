@@ -1,19 +1,22 @@
 require("SW7Town.nut");
 require("TownList.nut");
+require("BeliefManager.nut");
+require("TownBuilder.nut");
+require("Intention.nut");
 
 class SW7AI extends AIController
 {
 	/**************************************************************************
     * BDI Data
     **************************************************************************/
-	Beliefs = array(0);
-	Intents = array(0);
+	BeliefsManager = BeliefManager();
+	Intentions = array(0);
 	Desires = array(0);
 	
 	/**************************************************************************
 	* Other variables
 	**************************************************************************/
-	CurrentTownList = null;
+	
 	
 	/**************************************************************************
 	* Function footprint defined below
@@ -47,25 +50,46 @@ class SW7AI extends AIController
 }
 
 function SW7AI::BRF() {
-	
+	BeliefsManager.Update();
 }
 
 function SW7AI::GenerateDesires() {
-
+	Desires.clear();
+	
+	local size = Intentions.len();
+	
+	foreach(i, intention in Intentions) {
+		if(intention.CheckRequirementsMet()) {
+			Desires.append(intention);
+		}
+	}
 }
 
 function SW7AI::Filter() {
+	Intentions.clear();
+	Intentions.extend(Desires);
 	
 }
 
 function SW7AI::Execute() {
+	if(Intentions.len() < 1) {
+		AILog.Info("No intentions to execute");
+		return;
+	}
+	local ExecuteIntention = Intentions[0];
 	
+	switch(ExecuteIntention.GetIntention()) {
+		case Intention.BUILD_STATION_LARGEST_TOWN:
+			local TB = TownBuilder(BeliefManager.CurrentTownList.TownList.Begin());
+			TB.Build();
+			break;
+	}
 }
 
 function SW7AI::PreInitializeState() {
-	CurrentTownList = TownList();
+	
 }
 
 function SW7AI::InitializeState() {
-	
+	Intentions.append(Intention(Intention.BUILD_STATION_LARGEST_TOWN));
 }

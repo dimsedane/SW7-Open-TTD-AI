@@ -11,6 +11,10 @@ class SW7Town extends AITown {
 	function AddStation(Station) {
 		Station.AddItem(Station,0);
 	}
+	
+	function GetLocation() {
+		return ::AITown.GetLocation(TownId);
+	}
 }
 
 function SW7Town::IsServiced(Town) {

@@ -8,7 +8,6 @@ class Intention {
 		ThisIntention = IntentionType;
 	}
 	
-	
 	function GetIntention() {
 		return ThisIntention;
 	}
@@ -23,14 +22,12 @@ class Intention {
 		}
 	}
 	
-	
 	function CheckBuildStationLargestTown() {
-		local LargestTown = BeliefManager.CurrentTownList.Begin();
+		local LargestTown = BeliefManager.CurrentTownList.TownList.Begin();
 		
 		if(BeliefManager.CurrentServicedTownsList.rawin(LargestTown)) {
 			return false;
-		}
-		
+		}	
 		//TODO: Update to take other things into account
 		
 		return true;
