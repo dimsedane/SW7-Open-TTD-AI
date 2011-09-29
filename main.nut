@@ -1,3 +1,6 @@
+require("SW7Town.nut");
+require("TownList.nut");
+
 class SW7AI extends AIController
 {
 	/**************************************************************************
@@ -33,6 +36,7 @@ class SW7AI extends AIController
 	function Start()
 	{
 		InitializeState();
+		
 		while(true) {
 			BRF();
 			GenerateDesires();

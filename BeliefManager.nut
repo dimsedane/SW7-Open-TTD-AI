@@ -1,5 +1,6 @@
 class BeliefManager {
 	CurrentTownList = TownList();
+	CurrentServicedTownsList = {};
 	CurrentMoney = 0;
 	CurrentLoan = 0;
 	CurrentMaxLoan = 0;
@@ -16,5 +17,9 @@ function BeliefManager::Update() {
 	
 	CurrentLoan = AICompany.GetLoanAmount();
 	CurrentMoney = AICompany.GetBankBalance();
-	CurrentMaxLoan = AICompany.GetMaxLoanAmount();	
+	CurrentMaxLoan = AICompany.GetMaxLoanAmount();
+}
+
+function BeliefManager::AddServicedTown(Town) {
+	CurrentServicedTownList.rawset(Town.TownId,Town);
 }
