@@ -23,7 +23,7 @@ class Intention {
 	}
 	
 	function CheckBuildStationLargestTown() {
-		local LargestTown = BeliefManager.CurrentTownList.TownList.Begin();
+		local LargestTown = BeliefManager.CurrentTownList.Begin();
 		
 		if(BeliefManager.CurrentServicedTownsList.rawin(LargestTown)) {
 			return false;

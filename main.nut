@@ -80,7 +80,7 @@ function SW7AI::Execute() {
 	
 	switch(ExecuteIntention.GetIntention()) {
 		case Intention.BUILD_STATION_LARGEST_TOWN:
-			local TB = TownBuilder(BeliefManager.CurrentTownList.TownList.Begin());
+			local TB = TownBuilder(BeliefManager.CurrentTownList.Begin());
 			TB.Build();
 			break;
 	}
