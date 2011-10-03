@@ -16,7 +16,3 @@ class SW7Town extends AITown {
 		return ::AITown.GetLocation(TownId);
 	}
 }
-
-function SW7Town::IsServiced(Town) {
-	
-}
