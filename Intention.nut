@@ -1,9 +1,14 @@
 class Intention {
-	BUILD_STATION_LARGEST_TOWN = 1;
-	SOMETHING_ELSE = 2;
-	
 	ThisIntention = null;
 
+	/**************************************************************************
+	* Constants that should have been enums if this lang made sense.
+	**************************************************************************/
+	BUILD_INITIAL_STATION_IN_TOWN = 0;
+	BUILD_ADITIONAL_STATION = 1;
+	SOMETHING_ELSE = 3;
+	
+	
 	constructor(IntentionType) {
 		ThisIntention = IntentionType;
 	}
@@ -14,7 +19,7 @@ class Intention {
 	
 	function CheckRequirementsMet() {
 		switch(ThisIntention) {
-			case BUILD_STATION_LARGEST_TOWN:
+			case BUILD_INITIAL_STATION_IN_TOWN:
 				return CheckBuildStationLargestTown();
 				break;
 			default:
