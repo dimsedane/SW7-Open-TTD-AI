@@ -83,6 +83,9 @@ function SW7AI::Execute() {
 			local TB = TownBuilder(BeliefManager.CurrentTownList.Begin());
 			TB.Build();
 			break;
+		default:
+			AILog.Error("An intention was selected for execution, but was not recogniced by the excution handler");
+			break;
 	}
 }
 
