@@ -73,7 +73,6 @@ function SW7AI::Filter() {
 
 function SW7AI::Execute() {
 	if(Intentions.len() < 1) {
-		AILog.Info("No intentions to execute");
 		return;
 	}
 	local ExecuteIntention = Intentions[0];
