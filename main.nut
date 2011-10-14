@@ -3,6 +3,9 @@ require("TownList.nut");
 require("BeliefManager.nut");
 require("TownBuilder.nut");
 require("Intention.nut");
+require("DesireManager.nut");
+require("Desire.nut");
+require("FeedStationIntention.nut");
 
 class SW7AI extends AIController
 {
@@ -10,8 +13,8 @@ class SW7AI extends AIController
     * BDI Data
     **************************************************************************/
 	BeliefsManager = BeliefManager();
+	desireManager = null;
 	Intentions = array(0);
-	Desires = array(0);
 	
 	/**************************************************************************
 	* Other variables
@@ -53,45 +56,47 @@ function SW7AI::BRF() {
 	BeliefsManager.Update();
 }
 
+//Instantly activates FEED_STATION desire. 
+//This is supposed to be done only if beliefs match.
 function SW7AI::GenerateDesires() {
-	Desires.clear();
+	DesireManager.Desires.rawget(Desire.FEED_STATION).active = true;
+	foreach (town in BeliefManager.ActiveTownList) {
+		town.setDesire(Desire.FEED_STATION, true);
+	}
+}
+
+//NOTDONE!
+//Currently does not create list of intentions.
+//Should consider other things than towns.
+function SW7AI::Filter() {
+	local activeDesires = {};
+	local townsToConsider = {};
 	
-	local size = Intentions.len();
+	foreach (desire in DesireManager.Desires) {
+		if (desire.active) {
+			activeDesires.rawset(desire.DesireType, desire);
+		}
+	}
 	
-	foreach(i, intention in Intentions) {
-		if(intention.CheckRequirementsMet()) {
-			Desires.append(intention);
+	foreach (town in BeliefManager.ActiveTownList) {
+		foreach (desire in activeDesires) {
+			if (town.getDesireState(desire)) {
+				townsToConsider.rawset(town.TownId, town);
+
+			}
 		}
 	}
 }
 
-function SW7AI::Filter() {
-	Intentions.clear();
-	Intentions.extend(Desires);
-	
-}
-
 function SW7AI::Execute() {
-	if(Intentions.len() < 1) {
-		return;
-	}
-	local ExecuteIntention = Intentions[0];
-	
-	switch(ExecuteIntention.GetIntention()) {
-		case Intention.BUILD_INITIAL_STATION_IN_TOWN:
-			local TB = TownBuilder(BeliefManager.CurrentTownList.Begin());
-			TB.Build();
-			break;
-		default:
-			AILog.Error("An intention was selected for execution, but was not recogniced by the excution handler");
-			break;
-	}
+
 }
 
 function SW7AI::PreInitializeState() {
-	
+	//Might not be needed to do anything
 }
 
+//All initializations here!!!
 function SW7AI::InitializeState() {
-	Intentions.append(Intention(Intention.BUILD_INITIAL_STATION_IN_TOWN));
+	desireManager = DesireManager();
 }

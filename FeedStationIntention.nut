@@ -1,13 +1,16 @@
-class TownBuilder {
-	Town = null;
+﻿class FeedStationIntention extends Intention {
+	Station = null;
 	
-	constructor(TownId) {
-		Town = SW7Town(TownId);
+	constructor(_station) {
+		Station = _station;
 	}
+}
+
+function FeedStationIntention::Execute() {
 	
-	function Build() {
+	
 		AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
-		local loc = Town.GetLocation();
+		local loc = AITown.GetLocation(Station);
 		local firststation = null;
 		
 		if (AIRoad.AreRoadTilesConnected(loc, loc + AIMap.GetTileIndex(0, 1)) && AIRoad.AreRoadTilesConnected(loc + AIMap.GetTileIndex(0, 1), loc + AIMap.GetTileIndex(0, 2)) && AIRoad.AreRoadTilesConnected(loc + AIMap.GetTileIndex(0, 2), loc + AIMap.GetTileIndex(0, 3)) && AIRoad.AreRoadTilesConnected(loc + AIMap.GetTileIndex(0, 3), loc + AIMap.GetTileIndex(0, 4))) {
@@ -26,9 +29,6 @@ class TownBuilder {
 				AILog.Error("Attempted, but failed, to build");
 			}
 		}
-		
-		BeliefManager.AddServicedTown(Town);
-	}
+	
+	return true;
 }
-
-//Make station near (loc - (0,5)) & (loc + (0,5))

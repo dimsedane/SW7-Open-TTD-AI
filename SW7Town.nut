@@ -1,6 +1,7 @@
 class SW7Town extends AITown {
 	Stations = null;
 	TownId = null;
+	ActiveDesires = {};
 	
 	constructor(_TownId) {
 		::AITown.constructor();
@@ -14,5 +15,26 @@ class SW7Town extends AITown {
 	
 	function GetLocation() {
 		return ::AITown.GetLocation(TownId);
+	}
+	
+	function InitiateDesires() {
+		ActiveDesires.rawset(Desire.FEED_STATION, false);
+	}
+	
+	function setDesire(desire, state) {
+		if (state) {
+			ActiveDesires.rawset(desire, DesireManager.Desires.rawget(desire));
+		} else {
+			ActiveDesires.rawset(desire, false);
+		}
+	}
+	
+	function getDesireState(desire) {
+		if (!ActiveDesires.rawget(desire.DesireType)) {
+			AILog.Info("Desire false");
+			return false;
+		}
+		AILog.Info("Desire true");
+		return true;
 	}
 }
