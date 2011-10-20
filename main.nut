@@ -78,18 +78,23 @@ function SW7AI::Filter() {
 		}
 	}
 	
-	foreach (town in BeliefManager.ActiveTownList) {
+	foreach (town in BeliefsManager.ActiveTownList) {
 		foreach (desire in activeDesires) {
 			if (town.getDesireState(desire)) {
 				townsToConsider.rawset(town.TownId, town);
-
+				
 			}
 		}
+	}
+	
+	foreach (stationid, station in BeliefsManager.StationsToFeed) {
+		Intentions.append(FeedStationIntention(stationid));
 	}
 }
 
 function SW7AI::Execute() {
-
+	if (Intentions.len() > 0)
+		Intentions[0].Execute();
 }
 
 function SW7AI::PreInitializeState() {

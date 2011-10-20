@@ -4,7 +4,7 @@ class BeliefManager {
 	CurrentServicedTownsList = {};
 	
 	//Considers train stations only!
-	StationsToFeed = AIStationList(AIStation.STATION_TRAIN);
+	StationsToFeed = null;
 	
 	CurrentMoney = 0;
 	CurrentLoan = 0;
@@ -13,7 +13,6 @@ class BeliefManager {
 	function Update();
 	
 	constructor() {
-	
 	}
 }
 

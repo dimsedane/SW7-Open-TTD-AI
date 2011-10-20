@@ -31,10 +31,8 @@ class SW7Town extends AITown {
 	
 	function getDesireState(desire) {
 		if (!ActiveDesires.rawget(desire.DesireType)) {
-			AILog.Info("Desire false");
 			return false;
 		}
-		AILog.Info("Desire true");
 		return true;
 	}
 }
