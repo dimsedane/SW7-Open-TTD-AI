@@ -13,7 +13,8 @@ function FeedStationIntention::Execute() {
 	local loc = AITown.GetLocation(town);
 	local firststation = null;
 	
-	if (AIRoad.AreRoadTilesConnected(loc, loc + AIMap.GetTileIndex(0, 1)) && AIRoad.AreRoadTilesConnected(loc + AIMap.GetTileIndex(0, 1), loc + AIMap.GetTileIndex(0, 2)) && AIRoad.AreRoadTilesConnected(loc + AIMap.GetTileIndex(0, 2), loc + AIMap.GetTileIndex(0, 3)) && AIRoad.AreRoadTilesConnected(loc + AIMap.GetTileIndex(0, 3), loc + AIMap.GetTileIndex(0, 4))) {
+	
+	if (SW7Pathfinder.connected(loc, loc + AIMap.GetTileIndex(0,4))) {
 		if (AIRoad.AreRoadTilesConnected(loc + AIMap.GetTileIndex(0, 4), loc + AIMap.GetTileIndex(1, 4))) {
 			firststation = loc + AIMap.GetTileIndex(1, 4);
 		} else if (AIRoad.AreRoadTilesConnected(loc + AIMap.GetTileIndex(0, 4), loc + AIMap.GetTileIndex(-1, 4))) {

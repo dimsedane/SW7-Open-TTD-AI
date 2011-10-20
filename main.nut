@@ -6,6 +6,7 @@ require("Intention.nut");
 require("DesireManager.nut");
 require("Desire.nut");
 require("FeedStationIntention.nut");
+require("SW7Pathfinder.nut");
 
 class SW7AI extends AIController
 {
