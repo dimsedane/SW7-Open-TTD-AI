@@ -28,6 +28,28 @@ function FeedStationIntention::Execute() {
 	} else {
 		if (!AIRoad.BuildDriveThroughRoadStation(firststation, firststation + AIMap.GetTileIndex(1, 0), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)) {
 			AILog.Error("Attempted, but failed, to build");
+		} else {
+			local stationLocation = AIStation.GetLocation(Station);
+			local secondstation = null;
+			
+			for (local i = 0; i < 5; i++) {
+				for (local j = 0; j < i; j++) {
+					local k = i - j;
+					secondstation = stationLocation + AIMap.GetTileIndex(k, j);
+					
+					if (AIRoad.IsRoadTile(secondstation)) {
+						if (!AIRoad.BuildDriveThroughRoadStation(secondstation, secondstation + AIMap.GetTileIndex(1, 0), AIRoad.ROADVEHTYPE_BUS, Station)) {
+							if (!AIRoad.BuildDriveThroughRoadStation(secondstation, secondstation + AIMap.GetTileIndex(0, 1), AIRoad.ROADVEHTYPE_BUS, Station)) {
+								
+							} else {
+								return true;
+							}
+						} else {
+							return true;
+						}
+					}
+				}
+			}
 		}
 	}
 	
