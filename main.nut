@@ -7,6 +7,7 @@ require("DesireManager.nut");
 require("Desire.nut");
 require("FeedStationIntention.nut");
 require("SW7Pathfinder.nut");
+require("SW7MEUP.nut");
 
 class SW7AI extends AIController
 {
@@ -95,8 +96,12 @@ function SW7AI::Filter() {
 
 function SW7AI::Execute() {
 	if (Intentions.len() > 0) {
-		Intentions[0].Execute();
+		if (!Intentions[0].Execute()) {
+			AILog.Warning("Failed executing current Intention.");
+		}
 		Intentions.remove(0);
+	} else {
+		AILog.Warning("Failed executing current Intention.");
 	}
 }
 
