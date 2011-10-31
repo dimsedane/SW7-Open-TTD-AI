@@ -12,8 +12,7 @@ function FeedStationIntention::Execute() {
 	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
 	local loc = AITown.GetLocation(town);
 	local firststation = null;
-	
-	
+		
 	if (SW7Pathfinder.connected(loc, loc + AIMap.GetTileIndex(0,4))) {
 		if (AIRoad.AreRoadTilesConnected(loc + AIMap.GetTileIndex(0, 4), loc + AIMap.GetTileIndex(1, 4))) {
 			firststation = loc + AIMap.GetTileIndex(1, 4);
@@ -30,28 +29,48 @@ function FeedStationIntention::Execute() {
 			AILog.Error("Attempted, but failed, to build");
 		} else {
 			local stationLocation = AIStation.GetLocation(Station);
-			local secondstation = null;
+			local options = AITileList();
 			
 			for (local i = 0; i < 5; i++) {
 				for (local j = 0; j < i; j++) {
+					
 					local k = i - j;
-					secondstation = stationLocation + AIMap.GetTileIndex(k, j);
+					local secondstation = stationLocation + AIMap.GetTileIndex(k, j);
 					
 					if (AIRoad.IsRoadTile(secondstation)) {
-						if (!AIRoad.BuildDriveThroughRoadStation(secondstation, secondstation + AIMap.GetTileIndex(1, 0), AIRoad.ROADVEHTYPE_BUS, Station)) {
-							if (!AIRoad.BuildDriveThroughRoadStation(secondstation, secondstation + AIMap.GetTileIndex(0, 1), AIRoad.ROADVEHTYPE_BUS, Station)) {
-								
-							} else {
-								return true;
-							}
-						} else {
-							return true;
-						}
+						options.AddItem(secondstation, 0);
 					}
+					secondstation = stationLocation + AIMap.GetTileIndex(-k, -j);
+					if (AIRoad.IsRoadTile(secondstation)) {
+						options.AddItem(secondstation, 0);
+					}
+					
+					secondstation = stationLocation + AIMap.GetTileIndex(-k, j);
+					if (AIRoad.IsRoadTile(secondstation)) {
+						options.AddItem(secondstation, 0);
+					}
+					
+					secondstation = stationLocation + AIMap.GetTileIndex(k, -j);
+					if (AIRoad.IsRoadTile(secondstation)) {
+						options.AddItem(secondstation, 0);
+					}
+				}
+			}
+			
+			AILog.Info(options.Count() + " xx");
+					
+			foreach (tile, _ in options) {
+				if (!AIRoad.BuildDriveThroughRoadStation(tile, tile + AIMap.GetTileIndex(1, 0), AIRoad.ROADVEHTYPE_BUS, Station)) {
+					AILog.Info("Failed first attempt at tile " + AIMap.GetTileX(tile) + "," + AIMap.GetTileY(tile));
+					if (AIRoad.BuildDriveThroughRoadStation(tile, tile + AIMap.GetTileIndex(0, 1), AIRoad.ROADVEHTYPE_BUS, Station)) {
+						return true;
+					} else {
+						AILog.Info("Failed second attempt at tile " + AIMap.GetTileX(tile) + "," + AIMap.GetTileY(tile));
+					}
+				} else {
+					return true;
 				}
 			}
 		}
 	}
-	
-	return true;
 }
