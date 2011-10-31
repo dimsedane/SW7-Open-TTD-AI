@@ -56,8 +56,6 @@ function FeedStationIntention::Execute() {
 					}
 				}
 			}
-			
-			AILog.Info(options.Count() + " xx");
 					
 			foreach (tile, _ in options) {
 				if (!AIRoad.BuildDriveThroughRoadStation(tile, tile + AIMap.GetTileIndex(1, 0), AIRoad.ROADVEHTYPE_BUS, Station)) {

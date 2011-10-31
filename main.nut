@@ -94,8 +94,10 @@ function SW7AI::Filter() {
 }
 
 function SW7AI::Execute() {
-	if (Intentions.len() > 0)
+	if (Intentions.len() > 0) {
 		Intentions[0].Execute();
+		Intentions.remove(0);
+	}
 }
 
 function SW7AI::PreInitializeState() {
