@@ -6,6 +6,18 @@
 		Station = _station;
 		town = AIStation.GetNearestTown(Station);
 	}
+	
+    /** 
+	 * Execute the intention.
+	 * Returns whether the execution succeeded.
+	 */
+	function Execute();
+	
+	/**
+	 * Attempt to build a Drive Through Bus Station at the provided tile, linked with the given station.
+	 * (If a new station should be built, use AIStation.STATION_NEW as second parameter.)
+	 */
+	function BuildStation(tile, _stat);
 }
 
 function FeedStationIntention::Execute() {
