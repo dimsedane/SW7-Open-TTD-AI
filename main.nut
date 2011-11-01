@@ -29,10 +29,13 @@ class SW7AI extends AIController
 	 
 	//Create new beliefs based on old beliefs and new data
 	function BRF();
+
 	//Generate desires based on current beliefs and intents
 	function GenerateDesires();
+
 	//Generates new intents based on current beliefs, intents and desires
 	function Filter();
+
 	//Takes an action based on current intents
 	function Execute();
 	

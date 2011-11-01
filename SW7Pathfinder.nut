@@ -1,5 +1,8 @@
 ﻿import ("pathfinder.road", "RoadPathFinder", 3);
 class SW7Pathfinder {
+	/**
+	 * Check whether the provided tiles are directly connected by road.
+	 */
 	function connected(tile_id_a, tile_id_b);
 }
 

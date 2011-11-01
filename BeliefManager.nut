@@ -10,10 +10,18 @@ class BeliefManager {
 	CurrentLoan = 0;
 	CurrentMaxLoan = 0;
 	
-	function Update();
-	
 	constructor() {
 	}
+	
+	/**
+	 * Update the current beleifs of the AI.
+	 */
+	function Update();
+	
+	/**
+	 * Add a SW7Town to the list of serviced towns.
+	 */
+	function AddServicedTown(Town);
 }
 
 function BeliefManager::Update() {
@@ -33,6 +41,6 @@ function BeliefManager::Update() {
 	}
 }
 
-function BeliefManager::AddServicedTown(Town) {
-	BeliefManager.CurrentServicedTownsList.rawset(Town.TownId,Town);
+function BeliefManager::AddServicedTown(_SW7Town) {
+	BeliefManager.CurrentServicedTownsList.rawset(_SW7Town.TownId, _SW7Town);
 }
