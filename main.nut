@@ -101,7 +101,7 @@ function SW7AI::Execute() {
 		}
 		Intentions.remove(0);
 	} else {
-		AILog.Warning("Failed executing current Intention.");
+		AILog.Warning("No Intention to execute.");
 	}
 }
 

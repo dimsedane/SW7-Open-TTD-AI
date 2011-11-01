@@ -24,24 +24,26 @@ function FeedStationIntention::Execute() {
 			local tmp = stationLocation + AIMap.GetTileIndex(k, j);
 			
 			if (AIRoad.IsRoadTile(tmp)) {
-				options.AddItem(tmp, 0);
+				options.AddItem(tmp, i);
 			}
 			tmp = stationLocation + AIMap.GetTileIndex(-k, -j);
 			if (AIRoad.IsRoadTile(tmp)) {
-				options.AddItem(tmp, 0);
+				options.AddItem(tmp, i);
 			}
 			
 			tmp = stationLocation + AIMap.GetTileIndex(-k, j);
 			if (AIRoad.IsRoadTile(tmp)) {
-				options.AddItem(tmp, 0);
+				options.AddItem(tmp, i);
 			}
 			
 			tmp = stationLocation + AIMap.GetTileIndex(k, -j);
 			if (AIRoad.IsRoadTile(tmp)) {
-				options.AddItem(tmp, 0);
+				options.AddItem(tmp, i);
 			}
 		}
 	}
+	
+	options.Sort(AIList.SORT_BY_VALUE, true);
 	
 	local built = false;
 	foreach (tile, _ in options) {
@@ -54,40 +56,40 @@ function FeedStationIntention::Execute() {
 	if (built) {
 		local tileoptions = AITileList();
 		local testtile = loc + AIMap.GetTileIndex(1, 4);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(-1, 4);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(0, 5);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(0, 3);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		
 		testtile = loc + AIMap.GetTileIndex(1, -4);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(-1, -4);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(0, -5);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(0, -3);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		
 		testtile = loc + AIMap.GetTileIndex(4, 1);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(4, -1);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(5, 0);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(3, 0);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		
 		testtile = loc + AIMap.GetTileIndex(-4, 1);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(-4, -1);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(-5, 0);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		testtile = loc + AIMap.GetTileIndex(-3, 0);
-		if (check(testtile)) tileoptions.AddItem(testtile, 0);
+		if (check(testtile)) tileoptions.AddTile(testtile);
 		
 		tileoptions = SW7MEUP.optimize(tileoptions, [extendBusStationTile]);
 		
@@ -96,7 +98,10 @@ function FeedStationIntention::Execute() {
 			if (!built) {
 				built = BuildStation(tile, AIStation.STATION_NEW);
 			}
-			if (built) centreStationTile = tile;
+			if (built) {
+				centreStationTile = tile;
+				return true;
+			}
 		}
 	} else {
 		AILog.Error("Failed building station extension.");

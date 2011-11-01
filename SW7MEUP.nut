@@ -5,12 +5,12 @@
 function SW7MEUP::optimize (options, stations) {
 	foreach (option, val in options) {
 		local cp = AITile.GetCargoProduction(option, SW7MEUP.getPaxCargoType(), 1, 1, 3);
-		val = cp * 100;
+		val = cp;
 		foreach (station in stations) {
 			if (AITile.GetDistanceManhattanToTile(station, option) < 4) {
 				options.RemoveItem(option);
 			} else {
-				val -= (AITile.GetDistanceManhattanToTile(station, option))/5;
+				val -= 10/(AITile.GetDistanceManhattanToTile(station, option));
 			}
 		}
 	}
