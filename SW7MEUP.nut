@@ -14,16 +14,18 @@
 
 function SW7MEUP::optimize (options, stationtiles) {
 	foreach (option, val in options) {
-		local cp = AITile.GetCargoProduction(option, SW7MEUP.getPaxCargoId(), 1, 1, 3);
-		val = cp;
+	local cp = AITile.GetCargoProduction(option, SW7MEUP.getPaxCargoId(), 1, 1, 3);
+		local tmpCost = 6 * cp;
 		foreach (station in stationtiles) {
 			if (AITile.GetDistanceManhattanToTile(station, option) < 4) {
 				options.RemoveItem(option);
 			} else {
-				val -= 10/(AITile.GetDistanceManhattanToTile(station, option));
+				tmpCost += (1/(option, AITile.GetDistanceManhattanToTile(station, option)));
 			}
 		}
+		options.SetValue(option, tmpCost);
 	}
+	
 	options.Sort(AIList.SORT_BY_VALUE, false);
 	
 	return options;

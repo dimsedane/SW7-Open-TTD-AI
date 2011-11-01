@@ -29,7 +29,7 @@ function FeedStationIntention::Execute() {
 	local centreStationTile = null;
 	local stationLocation = AIStation.GetLocation(Station);
 			
-	for (local i = 0; i < 10; i++) {
+	for (local i = 1; i < 10; i++) {
 		for (local j = 0; j <= i; j++) {
 			
 			local k = i - j;
@@ -106,7 +106,7 @@ function FeedStationIntention::Execute() {
 		tileoptions = SW7MEUP.optimize(tileoptions, [extendBusStationTile]);
 		
 		built = false;
-		foreach (tile, _ in tileoptions) {
+		foreach (tile, val in tileoptions) {
 			if (!built) {
 				built = BuildStation(tile, AIStation.STATION_NEW);
 			}
