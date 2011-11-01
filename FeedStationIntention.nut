@@ -110,15 +110,84 @@ function FeedStationIntention::Execute() {
 			if (!built) {
 				built = BuildStation(tile, AIStation.STATION_NEW);
 			}
-			if (built) {
+			if (built && centreStationTile == null) {
 				centreStationTile = tile;
-				return true;
 			}
 		}
+		
+		//Build depot
+		if (centreStationTile != null && extendBusStationTile != null) {
+			local depottiles = AITileList();
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(14, 1), 1);
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(14, -1), 0);
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-14, 1), 1);
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-14, -1), 0);
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, 14), 2);
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, -14), 2);
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, 14), 3);
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, -14), 3);
+			
+			local depotbuild = false;
+			local depottile = null;
+			foreach (tile, dir in depottiles) {
+				if (!depotbuild) {
+					local front = null;
+					switch (dir) {
+						case 0:
+							front = tile + AIMap.GetTileIndex(0, 1);
+							break;
+						case 1:
+							front = tile - AIMap.GetTileIndex(0, 1);
+							break;
+						case 2: 
+							front = tile - AIMap.GetTileIndex(1, 0);
+							break;
+						case 3:
+							front = tile + AIMap.GetTileIndex(1, 0);
+							break;
+					}
+					
+					if (AITile.GetMinHeight(front) == AITile.GetMaxHeight(front)) {
+						depotbuild = AIRoad.BuildRoadDepot(tile, front);
+					}
+				}
+
+				if (depotbuild && depottile == null) {
+					depottile = tile;
+				}
+			}
+			
+			SW7Pathfinder.connect(depottile, AITown.GetLocation(town));
+			
+			local engList = AIEngineList(AIVehicle.VT_ROAD);
+			local eng = null;
+			foreach (engine, _ in engList) {
+				if (AIEngine.GetCargoType(engine) == SW7MEUP.getPaxCargoId()) {
+					eng = engine;
+					break;
+				}
+			}
+			
+			if (eng != null) {
+				local veh = AIVehicle.BuildVehicle(depottile, eng);
+				AILog.Info(centreStationTile);
+				AIOrder.AppendOrder(veh, centreStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+				AIOrder.AppendOrder(veh, extendBusStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+				
+				AIVehicle.StartStopVehicle(veh);
+			}
+		}
+		
+		//Build Road Vehicle
+		//Create order list
+		//Assign order list
+		//Start vehicle
+		
 	} else {
 		AILog.Error("Failed building station extension.");
 		return false;
 	}
+	return true;
 }
 
 function FeedStationIntention::BuildStation(tile, _stat) {
