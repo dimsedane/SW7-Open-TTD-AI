@@ -11,7 +11,7 @@
 function FeedStationIntention::Execute() {
 	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
 	local loc = AITown.GetLocation(town);
-	local firststation = null;
+	
 	local options = AITileList();
 	local extendBusStationTile = null;
 	local centreStationTile = null;
