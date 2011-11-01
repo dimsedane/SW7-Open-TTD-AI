@@ -8,6 +8,7 @@ require("Desire.nut");
 require("FeedStationIntention.nut");
 require("SW7Pathfinder.nut");
 require("SW7MEUP.nut");
+require("TileListGenerator.nut");
 
 class SW7AI extends AIController
 {

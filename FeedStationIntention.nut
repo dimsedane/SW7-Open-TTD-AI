@@ -29,31 +29,7 @@ function FeedStationIntention::Execute() {
 	local centreStationTile = null;
 	local stationLocation = AIStation.GetLocation(Station);
 			
-	for (local i = 1; i < 10; i++) {
-		for (local j = 0; j <= i; j++) {
-			
-			local k = i - j;
-			local tmp = stationLocation + AIMap.GetTileIndex(k, j);
-			
-			if (AIRoad.IsRoadTile(tmp)) {
-				options.AddItem(tmp, i);
-			}
-			tmp = stationLocation + AIMap.GetTileIndex(-k, -j);
-			if (AIRoad.IsRoadTile(tmp)) {
-				options.AddItem(tmp, i);
-			}
-			
-			tmp = stationLocation + AIMap.GetTileIndex(-k, j);
-			if (AIRoad.IsRoadTile(tmp)) {
-				options.AddItem(tmp, i);
-			}
-			
-			tmp = stationLocation + AIMap.GetTileIndex(k, -j);
-			if (AIRoad.IsRoadTile(tmp)) {
-				options.AddItem(tmp, i);
-			}
-		}
-	}
+	options = TileListGenerator.generateNear(stationLocation, 10);
 	
 	options.Sort(AIList.SORT_BY_VALUE, true);
 	
@@ -66,42 +42,7 @@ function FeedStationIntention::Execute() {
 	}
 
 	if (built) {
-		local tileoptions = AITileList();
-		local testtile = loc + AIMap.GetTileIndex(1, 4);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(-1, 4);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(0, 5);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(0, 3);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		
-		testtile = loc + AIMap.GetTileIndex(1, -4);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(-1, -4);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(0, -5);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(0, -3);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		
-		testtile = loc + AIMap.GetTileIndex(4, 1);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(4, -1);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(5, 0);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(3, 0);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		
-		testtile = loc + AIMap.GetTileIndex(-4, 1);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(-4, -1);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(-5, 0);
-		if (check(testtile)) tileoptions.AddTile(testtile);
-		testtile = loc + AIMap.GetTileIndex(-3, 0);
-		if (check(testtile)) tileoptions.AddTile(testtile);
+		local tileoptions = TileListGenerator.generateFlatRoadTilesNear(AITown.GetLocation(town), 5);
 		
 		tileoptions = SW7MEUP.optimize(tileoptions, [extendBusStationTile]);
 		
@@ -117,15 +58,7 @@ function FeedStationIntention::Execute() {
 		
 		//Build depot
 		if (centreStationTile != null && extendBusStationTile != null) {
-			local depottiles = AITileList();
-			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(14, 1), 1);
-			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(14, -1), 0);
-			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-14, 1), 1);
-			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-14, -1), 0);
-			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, 14), 2);
-			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, -14), 2);
-			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, 14), 3);
-			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, -14), 3);
+			local depottiles = TileListGenerator.generateDepotTiles(town);
 			
 			local depotbuild = false;
 			local depottile = null;
@@ -175,16 +108,13 @@ function FeedStationIntention::Execute() {
 				AIOrder.AppendOrder(veh, extendBusStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
 				
 				AIVehicle.StartStopVehicle(veh);
+			} else {
+				return false;
 			}
+		} else {
+			return false;
 		}
-		
-		//Build Road Vehicle
-		//Create order list
-		//Assign order list
-		//Start vehicle
-		
 	} else {
-		AILog.Error("Failed building station extension.");
 		return false;
 	}
 	return true;
