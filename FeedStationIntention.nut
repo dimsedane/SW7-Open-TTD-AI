@@ -162,7 +162,7 @@ function FeedStationIntention::Execute() {
 			local engList = AIEngineList(AIVehicle.VT_ROAD);
 			local eng = null;
 			foreach (engine, _ in engList) {
-				if (AIEngine.GetCargoType(engine) == SW7MEUP.getPaxCargoId()) {
+				if (AIEngine.GetCargoType(engine) == SW7AI.BeliefsManager.PaxCargoId) {
 					eng = engine;
 					break;
 				}

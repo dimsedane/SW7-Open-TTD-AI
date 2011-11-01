@@ -2,6 +2,7 @@ class BeliefManager {
 	CurrentTownList = TownList();
 	ActiveTownList = {};
 	CurrentServicedTownsList = {};
+	PaxCargoId = null;
 	
 	//Considers train stations only!
 	StationsToFeed = null;
@@ -11,6 +12,7 @@ class BeliefManager {
 	CurrentMaxLoan = 0;
 	
 	constructor() {
+		PaxCargoId = this.getPaxCargoId();
 	}
 	
 	/**
@@ -43,4 +45,12 @@ function BeliefManager::Update() {
 
 function BeliefManager::AddServicedTown(_SW7Town) {
 	BeliefManager.CurrentServicedTownsList.rawset(_SW7Town.TownId, _SW7Town);
+}
+
+function BeliefManager::getPaxCargoId () {
+	local cargoList = AICargoList();
+	cargoList.Valuate(AICargo.HasCargoClass, AICargo.CC_PASSENGERS);
+	cargoList.KeepValue(1);
+	if (cargoList.Count() == 0) AILog.Error("Your game doesn't have any passengers cargo, and as we are a passenger only AI, we can't do anything");
+	return cargoList.Begin();
 }

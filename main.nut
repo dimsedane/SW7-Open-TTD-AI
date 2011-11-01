@@ -14,7 +14,7 @@ class SW7AI extends AIController
 	/**************************************************************************
     * BDI Data
     **************************************************************************/
-	BeliefsManager = BeliefManager();
+	static BeliefsManager = BeliefManager();
 	desireManager = null;
 	Intentions = array(0);
 	
