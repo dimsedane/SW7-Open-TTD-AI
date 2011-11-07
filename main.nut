@@ -84,28 +84,30 @@ function SW7AI::Filter() {
 		}
 	}
 	
-	foreach (town in BeliefsManager.ActiveTownList) {
+	foreach (townid, sw7town in BeliefsManager.ActiveTownList) {
 		foreach (desire in activeDesires) {
-			if (town.getDesireState(desire)) {
-				townsToConsider.rawset(town.TownId, town);	
+			if (sw7town.getDesireState(desire)) {
+				townsToConsider.rawset(townid, sw7town);	
 			}
 		}
 	}
 	
 	//Add FeedStationIntention
 	foreach (station, _ in BeliefsManager.StationsToFeed) {
-		AILog.Info(AIStation.GetName(station));
-		local fsI = FeedStationIntention(station);
-		foreach (Intention in Intentions) {
-			if (Intention instanceof FeedStationIntention) {
-				if (Intention.Station == station) {
-					fsI = null;
+		if (AITown.GetPopulation(AIStation.GetNearestTown(station)) > 500) {
+			AILog.Info(AIStation.GetName(station));
+			local fsI = FeedStationIntention(station);
+			foreach (Intention in Intentions) {
+				if (Intention instanceof FeedStationIntention) {
+					if (Intention.Station == station) {
+						fsI = null;
+					}
 				}
 			}
-		}
-		
-		if (fsI != null) {
-			Intentions.append(fsI);
+			
+			if (fsI != null) {
+				Intentions.append(fsI);
+			}
 		}
 	}
 }
