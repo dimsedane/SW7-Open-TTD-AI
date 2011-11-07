@@ -82,7 +82,7 @@ function FeedStationIntention::Execute() {
 							break;
 					}
 					
-					if (AITile.GetMinHeight(front) == AITile.GetMaxHeight(front)) {
+					if (AITile.GetMinHeight(front) == AITile.GetMaxHeight(front) && AITile.IsBuildable(front)) {
 						depotbuild = AIRoad.BuildRoadDepot(tile, front);
 					}
 				}
@@ -92,25 +92,29 @@ function FeedStationIntention::Execute() {
 				}
 			}
 			
-			SW7Pathfinder.connect(depottile, AITown.GetLocation(town));
-			
-			local engList = AIEngineList(AIVehicle.VT_ROAD);
-			local eng = null;
-			foreach (engine, _ in engList) {
-				if (AIEngine.GetCargoType(engine) == SW7AI.BeliefsManager.PaxCargoId) {
-					eng = engine;
-					break;
-				}
-			}
-			
-			if (eng != null) {
-				local veh = AIVehicle.BuildVehicle(depottile, eng);
-				AILog.Info(centreStationTile);
-				AIOrder.AppendOrder(veh, centreStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
-				AIOrder.AppendOrder(veh, extendBusStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+			if (depottile != null && town != null) {
+				SW7Pathfinder.connect(depottile, AITown.GetLocation(town));
 				
-				AIVehicle.StartStopVehicle(veh);
-			} else {
+				local engList = AIEngineList(AIVehicle.VT_ROAD);
+				local eng = null;
+				foreach (engine, _ in engList) {
+					if (AIEngine.GetCargoType(engine) == SW7AI.BeliefsManager.PaxCargoId) {
+						eng = engine;
+						break;
+					}
+				}
+				
+				if (eng != null) {
+					local veh = AIVehicle.BuildVehicle(depottile, eng);
+					AILog.Info(centreStationTile);
+					AIOrder.AppendOrder(veh, centreStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+					AIOrder.AppendOrder(veh, extendBusStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+					
+					AIVehicle.StartStopVehicle(veh);
+				} else {
+					return false;
+				} 
+			}else {
 				return false;
 			}
 		} else {
