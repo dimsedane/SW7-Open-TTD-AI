@@ -87,14 +87,26 @@ function SW7AI::Filter() {
 	foreach (town in BeliefsManager.ActiveTownList) {
 		foreach (desire in activeDesires) {
 			if (town.getDesireState(desire)) {
-				townsToConsider.rawset(town.TownId, town);
-				
+				townsToConsider.rawset(town.TownId, town);	
 			}
 		}
 	}
 	
-	foreach (stationid, station in BeliefsManager.StationsToFeed) {
-		Intentions.append(FeedStationIntention(stationid));
+	//Add FeedStationIntention
+	foreach (station, _ in BeliefsManager.StationsToFeed) {
+		AILog.Info(AIStation.GetName(station));
+		local fsI = FeedStationIntention(station);
+		foreach (Intention in Intentions) {
+			if (Intention instanceof FeedStationIntention) {
+				if (Intention.Station == station) {
+					fsI = null;
+				}
+			}
+		}
+		
+		if (fsI != null) {
+			Intentions.append(fsI);
+		}
 	}
 }
 
@@ -104,8 +116,6 @@ function SW7AI::Execute() {
 			AILog.Warning("Failed executing current Intention.");
 		}
 		Intentions.remove(0);
-	} else {
-		AILog.Warning("No Intention to execute.");
 	}
 }
 

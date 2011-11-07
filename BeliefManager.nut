@@ -34,7 +34,6 @@ function BeliefManager::Update() {
 	CurrentMaxLoan = AICompany.GetMaxLoanAmount();
 	
 	StationsToFeed = AIStationList(AIStation.STATION_TRAIN);
-	
 	StationsToFeed.RemoveList(AIStationList(AIStation.STATION_BUS_STOP));
 	
 	foreach (station, _ in StationsToFeed) {

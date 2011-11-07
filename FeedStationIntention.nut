@@ -3,8 +3,8 @@
 	town = null;
 	
 	constructor(_station) {
-		Station = _station;
-		town = AIStation.GetNearestTown(Station);
+		this.Station = _station;
+		this.town = AIStation.GetNearestTown(_station);
 	}
 	
     /** 
@@ -28,6 +28,8 @@ function FeedStationIntention::Execute() {
 	local extendBusStationTile = null;
 	local centreStationTile = null;
 	local stationLocation = AIStation.GetLocation(Station);
+	
+	AILog.Info("Executing FeedStationIntention for station " + AIStation.GetName(Station) + " in " + AITown.GetName(town));
 			
 	options = TileListGenerator.generateNear(stationLocation, 10);
 	
