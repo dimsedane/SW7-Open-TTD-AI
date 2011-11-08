@@ -72,10 +72,10 @@ function FeedStationIntention::Execute() {
 							front = tile + AIMap.GetTileIndex(0, 1);
 							break;
 						case 1:
-							front = tile - AIMap.GetTileIndex(0, 1);
+							front = tile + AIMap.GetTileIndex(0, -1);
 							break;
 						case 2: 
-							front = tile - AIMap.GetTileIndex(1, 0);
+							front = tile + AIMap.GetTileIndex(-1, 0);
 							break;
 						case 3:
 							front = tile + AIMap.GetTileIndex(1, 0);
@@ -95,14 +95,7 @@ function FeedStationIntention::Execute() {
 			if (depottile != null && town != null) {
 				SW7Pathfinder.connect(depottile, AITown.GetLocation(town));
 				
-				local engList = AIEngineList(AIVehicle.VT_ROAD);
-				local eng = null;
-				foreach (engine, _ in engList) {
-					if (AIEngine.GetCargoType(engine) == SW7AI.BeliefsManager.PaxCargoId) {
-						eng = engine;
-						break;
-					}
-				}
+				local eng = SW7MEUP.GetRoadVehicle(SW7MEUP.RV_PARAM_HIGH_CARGO_CAPACITY);
 				
 				if (eng != null) {
 					local veh = AIVehicle.BuildVehicle(depottile, eng);
@@ -111,17 +104,11 @@ function FeedStationIntention::Execute() {
 					AIOrder.AppendOrder(veh, extendBusStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
 					
 					AIVehicle.StartStopVehicle(veh);
-				} else {
-					return false;
+					
+					return true;
 				} 
-			}else {
-				return false;
 			}
-		} else {
-			return false;
 		}
-	} else {
-		return false;
 	}
 	return true;
 }
