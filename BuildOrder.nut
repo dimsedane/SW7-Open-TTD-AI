@@ -43,17 +43,15 @@ class BusStationBuildOrder extends BuildOrder {
 		local accounting = AIAccounting();
 		
 		local built = false;
-		built = AIRoad.BuildDriveThroughRoadStation(tile, tile + AIMap.GetTileIndex(1, 0), AIRoad.ROADVEHTYPE_BUS, joinStation);
-		if (built) {
-			front = tile + AIMap.GetTileIndex(1, 0);
-		} else {
-			built = AIRoad.BuildDriveThroughRoadStation(tile, tile + AIMap.GetTileIndex(0, 1), AIRoad.ROADVEHTYPE_BUS, joinStation);
-			if (built) {
-				front = tile + AIMap.GetTileIndex(0, 1);
-			}
+		front = tile + AIMap.GetTileIndex(1, 0);
+		
+		built = AIRoad.BuildDriveThroughRoadStation(tile, front, AIRoad.ROADVEHTYPE_BUS, joinStation);
+		if (!built) {
+			front = tile + AIMap.GetTileIndex(0, 1);
+			built = AIRoad.BuildDriveThroughRoadStation(tile, front, AIRoad.ROADVEHTYPE_BUS, joinStation);
 		}
 		
-		if (built) { 
+		if (built) {
 			IsExecutable = true;
 			return accounting.GetCosts();
 		}
