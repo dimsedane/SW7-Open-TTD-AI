@@ -71,16 +71,17 @@ class VehicleBuildOrder extends BuildOrder {
 	}
 	
 	function test() {
-		local test = AITestMode();
-		local accounting = AIAccounting();
-		
-		//Set IsExecutable to true if test succeeds.
-		return null;
+		IsExecutable = true;
+		return AIEngine.GetPrice(engine);
 	}
 	
 	function execute() {
 		if (IsExecutable) {
-		
+			local veh = AIVehicle.BuildVehicle(depot, engine);
+			
+			if (AIVehicle.IsValidVehicle(veh)) {
+				return veh;
+			}
 		}
 		
 		return false;
@@ -90,6 +91,7 @@ class VehicleBuildOrder extends BuildOrder {
 class RoadBuildOrder extends BuildOrder {
 	start = null;
 	end = null;
+	path = null;
 	
 	constructor (_start, _end) {
 		this.start = _start;
@@ -100,13 +102,19 @@ class RoadBuildOrder extends BuildOrder {
 		local test = AITestMode();
 		local accounting = AIAccounting();
 		
-		//Set IsExecutable to true if test succeeds.
-		return null;
+		path = SW7Pathfinder.getpath(start, end);
+		if (path == null) {
+			return null;
+		} else {
+			SW7Pathfinder.buildpath(path);
+			IsExecutable = true;
+			return accounting.GetCosts();
+		}
 	}
 	
 	function execute() {
 		if (IsExecutable) {
-		
+			return SW7Pathfinder.buildpath(path);
 		}
 		return false;
 	}

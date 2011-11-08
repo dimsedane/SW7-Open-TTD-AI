@@ -95,7 +95,6 @@ function SW7AI::Filter() {
 	//Add FeedStationIntention
 	foreach (station, _ in BeliefsManager.StationsToFeed) {
 		if (townsToConsider.rawin(AIStation.GetNearestTown(station))) {
-			AILog.Info(AIStation.GetName(station));
 			local fsI = FeedStationIntention(station);
 			foreach (Intention in Intentions) {
 				if (Intention instanceof FeedStationIntention) {

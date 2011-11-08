@@ -23,8 +23,6 @@ function FeedStationIntention::Execute() {
 	local centreStationTile = null;
 	local stationLocation = AIStation.GetLocation(Station);
 	
-	AILog.Info("Executing FeedStationIntention for station " + AIStation.GetName(Station) + " in " + AITown.GetName(town));
-			
 	options = TileListGenerator.generateNear(stationLocation, 10);
 	
 	options.Sort(AIList.SORT_BY_VALUE, true);
@@ -65,26 +63,41 @@ function FeedStationIntention::Execute() {
 				}
 				dbo = null;
 			}
-
-			extendBusStationTile = ebsbo.execute();
-			centreStationTile = cbsbo.execute();
-			depottile = dbo.execute();
-		
-			if (depottile != null && town != null) {
-				SW7Pathfinder.connect(depottile, AITown.GetLocation(town));
-					
-				local engList = SW7MEUP.GetRoadVehicle(SW7MEUP.RV_PARAM_HIGH_CARGO_CAPACITY);
-				local eng = engList.Begin();
+			
+			if (dbo != null) {
+				local depottile = dbo.location;
 				
-				if (eng != null) {
-					local veh = AIVehicle.BuildVehicle(depottile, eng);
-					AILog.Info(centreStationTile);
-					AIOrder.AppendOrder(veh, centreStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
-					AIOrder.AppendOrder(veh, extendBusStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+				local rbo = RoadBuildOrder(dbo.front, extendBusStationTile);
+				local rbot = rbo.test();
+				
+				if (rbot != null) {
+					local engList = SW7MEUP.GetRoadVehicle(SW7MEUP.RV_PARAM_HIGH_CARGO_CAPACITY);
+					local vbo = null;
 					
-					AIVehicle.StartStopVehicle(veh);
+					foreach (engL, _ in engList) {
+						vbo = VehicleBuildOrder(depottile, engL);
+						if (vbo.test() != null) {
+							break;
+						}
+						vbo = null;
+					}
 					
-					return true;
+					if (vbo != null) {
+						extendBusStationTile = ebsbo.execute();
+						centreStationTile = cbsbo.execute();
+						depottile = dbo.execute();
+						rbot = rbo.execute();
+						
+						AIRoad.BuildRoad(depottile, dbo.front);
+						
+						vbo.depot = depottile;
+						local veh = vbo.execute();
+						AIOrder.AppendOrder(veh, centreStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+						AIOrder.AppendOrder(veh, extendBusStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+						AIVehicle.StartStopVehicle(veh);
+						
+						return true;
+					}
 				}
 			}
 		}
