@@ -45,14 +45,14 @@
 	
 	function generateDepotTiles(town) {
 		local depottiles = AITileList();
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(14, 1), 1);
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(14, -1), 0);
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-14, 1), 1);
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-14, -1), 0);
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, 14), 2);
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, -14), 2);
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, 14), 3);
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, -14), 3);
+		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(14, 1), AITown.GetLocation(town) + AIMap.GetTileIndex(14, 0));
+		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(14, -1), AITown.GetLocation(town) + AIMap.GetTileIndex(14, 0));
+		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-14, 1), AITown.GetLocation(town) + AIMap.GetTileIndex(-14, 0));
+		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-14, -1), AITown.GetLocation(town) + AIMap.GetTileIndex(-14, 0));
+		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, 14), AITown.GetLocation(town) + AIMap.GetTileIndex(0, 14));
+		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, -14), AITown.GetLocation(town) + AIMap.GetTileIndex(0, -14));
+		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, 14), AITown.GetLocation(town) + AIMap.GetTileIndex(0, 14));
+		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, -14), AITown.GetLocation(town) + AIMap.GetTileIndex(0, -14));
 		
 		return depottiles;
 	}

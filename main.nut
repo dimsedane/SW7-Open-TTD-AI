@@ -1,7 +1,6 @@
 require("SW7Town.nut");
 require("TownList.nut");
 require("BeliefManager.nut");
-//require("TownBuilder.nut");
 require("Intention.nut");
 require("DesireManager.nut");
 require("Desire.nut");
@@ -9,6 +8,7 @@ require("FeedStationIntention.nut");
 require("SW7Pathfinder.nut");
 require("SW7MEUP.nut");
 require("TileListGenerator.nut");
+require("BuildOrder.nut");
 
 class SW7AI extends AIController
 {

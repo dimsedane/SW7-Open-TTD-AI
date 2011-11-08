@@ -12,12 +12,6 @@
 	 * Returns whether the execution succeeded.
 	 */
 	function Execute();
-	
-	/**
-	 * Attempt to build a Drive Through Bus Station at the provided tile, linked with the given station.
-	 * (If a new station should be built, use AIStation.STATION_NEW as second parameter.)
-	 */
-	function BuildStation(tile, _stat);
 }
 
 function FeedStationIntention::Execute() {
@@ -35,66 +29,50 @@ function FeedStationIntention::Execute() {
 	
 	options.Sort(AIList.SORT_BY_VALUE, true);
 	
-	local built = false;
+	local ebsbo = null;
+	local cbsbo = null;
 	foreach (tile, _ in options) {
-		if (!built) {
-			built = BuildStation(tile, Station);
-			if (built) extendBusStationTile = tile;
+		ebsbo = BusStationBuildOrder(tile, Station);
+		if (ebsbo.test() != null) {
+			break;
 		}
+		ebsbo = null;
 	}
-
-	if (built) {
-		local tileoptions = TileListGenerator.generateFlatRoadTilesNear(AITown.GetLocation(town), 5);
+	
+	if (ebsbo != null) {
+		extendBusStationTile = ebsbo.tile;
+	
+		options = TileListGenerator.generateFlatRoadTilesNear(AITown.GetLocation(town), 5);
+		options = SW7MEUP.optimize(options, [extendBusStationTile]);
 		
-		tileoptions = SW7MEUP.optimize(tileoptions, [extendBusStationTile]);
-		
-		built = false;
-		foreach (tile, val in tileoptions) {
-			if (!built) {
-				built = BuildStation(tile, AIStation.STATION_NEW);
+		foreach (tile, _ in options) {
+			cbsbo = BusStationBuildOrder(tile, AIStation.STATION_NEW);
+			if (cbsbo.test() != null) {
+				break;
 			}
-			if (built && centreStationTile == null) {
-				centreStationTile = tile;
-			}
+			cbsbo = null;
 		}
 		
-		//Build depot
-		if (centreStationTile != null && extendBusStationTile != null) {
-			local depottiles = TileListGenerator.generateDepotTiles(town);
-			
-			local depotbuild = false;
+		if (cbsbo != null) {
+			options = TileListGenerator.generateDepotTiles(town);
+			local dbo = null;
 			local depottile = null;
-			foreach (tile, dir in depottiles) {
-				if (!depotbuild) {
-					local front = null;
-					switch (dir) {
-						case 0:
-							front = tile + AIMap.GetTileIndex(0, 1);
-							break;
-						case 1:
-							front = tile + AIMap.GetTileIndex(0, -1);
-							break;
-						case 2: 
-							front = tile + AIMap.GetTileIndex(-1, 0);
-							break;
-						case 3:
-							front = tile + AIMap.GetTileIndex(1, 0);
-							break;
-					}
-					
-					if (AITile.GetMinHeight(front) == AITile.GetMaxHeight(front) && AITile.IsBuildable(front)) {
-						depotbuild = AIRoad.BuildRoadDepot(tile, front);
-					}
-				}
-
-				if (depotbuild && depottile == null) {
-					depottile = tile;
-				}
-			}
 			
+			foreach (tile, front in options) {
+				dbo = DepotBuildOrder(tile, front);
+				if (dbo.test() != null) {
+					break;
+				}
+				dbo = null;
+			}
+
+			extendBusStationTile = ebsbo.execute();
+			centreStationTile = cbsbo.execute();
+			depottile = dbo.execute();
+		
 			if (depottile != null && town != null) {
 				SW7Pathfinder.connect(depottile, AITown.GetLocation(town));
-				
+					
 				local engList = SW7MEUP.GetRoadVehicle(SW7MEUP.RV_PARAM_HIGH_CARGO_CAPACITY);
 				local eng = engList.Begin();
 				
@@ -107,24 +85,9 @@ function FeedStationIntention::Execute() {
 					AIVehicle.StartStopVehicle(veh);
 					
 					return true;
-				} 
+				}
 			}
 		}
 	}
 	return false;
-}
-
-function FeedStationIntention::BuildStation(tile, _stat) {
-	if (!AIRoad.BuildDriveThroughRoadStation(tile, tile + AIMap.GetTileIndex(1, 0), AIRoad.ROADVEHTYPE_BUS, _stat)) {
-		if (AIRoad.BuildDriveThroughRoadStation(tile, tile + AIMap.GetTileIndex(0, 1), AIRoad.ROADVEHTYPE_BUS, _stat)) {
-			return true;
-		}
-	} else {
-		return true;
-	}
-	return false;
-}
-
-function check(tile) {
-	return (AIRoad.IsRoadTile(tile) && (AITile.GetMinHeight(tile) == AITile.GetMaxHeight(tile)));
 }
