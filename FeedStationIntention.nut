@@ -95,7 +95,8 @@ function FeedStationIntention::Execute() {
 			if (depottile != null && town != null) {
 				SW7Pathfinder.connect(depottile, AITown.GetLocation(town));
 				
-				local eng = SW7MEUP.GetRoadVehicle(SW7MEUP.RV_PARAM_HIGH_CARGO_CAPACITY);
+				local engList = SW7MEUP.GetRoadVehicle(SW7MEUP.RV_PARAM_HIGH_CARGO_CAPACITY);
+				local eng = engList.Begin();
 				
 				if (eng != null) {
 					local veh = AIVehicle.BuildVehicle(depottile, eng);
@@ -110,7 +111,7 @@ function FeedStationIntention::Execute() {
 			}
 		}
 	}
-	return true;
+	return false;
 }
 
 function FeedStationIntention::BuildStation(tile, _stat) {

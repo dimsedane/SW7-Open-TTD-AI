@@ -35,7 +35,7 @@ class SW7Town extends AITown {
 	 */
 	function setDesire(desire, state) {
 		if (state) {
-			ActiveDesires.rawset(desire, DesireManager.Desires.rawget(desire));
+			ActiveDesires.rawset(desire, true);
 		} else {
 			ActiveDesires.rawset(desire, false);
 		}
@@ -45,9 +45,10 @@ class SW7Town extends AITown {
 	 * Get current desire state. If town has the desire active, it is also checked, whether the desire itself is active.
 	 */
 	function getDesireState(desire) {
-		if (!ActiveDesires.rawget(desire.DesireType)) {
-			return false;
+		if (ActiveDesires.rawin(desire.DesireType) && ActiveDesires.rawget(desire.DesireType)) {
+			if (DesireManager.Desires.rawin(desire.DesireType)) {
+				return DesireManager.Desires.rawget(desire.DesireType);
+			}
 		}
-		return true;
 	}
 }

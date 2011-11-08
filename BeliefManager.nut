@@ -1,6 +1,15 @@
 class BeliefManager {
+	/**
+	 * Towns in the map, ordered by population.
+	 */
 	CurrentTownList = TownList();
+	/**
+	 * All towns with a station that is not already fed. (Built from StationsToFeed list)
+	 */
 	ActiveTownList = {};
+	/**
+	 * Not used currently.
+	 */
 	CurrentServicedTownsList = {};
 	PaxCargoId = null;
 	
@@ -16,7 +25,7 @@ class BeliefManager {
 	}
 	
 	/**
-	 * Update the current beleifs of the AI.
+	 * Update the current beliefs of the AI.
 	 */
 	function Update();
 	

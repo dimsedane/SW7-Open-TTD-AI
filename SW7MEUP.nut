@@ -62,5 +62,5 @@ function SW7MEUP::GetRoadVehicle (flag) {
 	}
 	engList.Sort(AIList.SORT_BY_VALUE, sortOrder);
 	
-	return engList.Begin();
+	return engList;
 }

@@ -1,7 +1,7 @@
 require("SW7Town.nut");
 require("TownList.nut");
 require("BeliefManager.nut");
-require("TownBuilder.nut");
+//require("TownBuilder.nut");
 require("Intention.nut");
 require("DesireManager.nut");
 require("Desire.nut");
@@ -67,13 +67,13 @@ function SW7AI::BRF() {
 function SW7AI::GenerateDesires() {
 	DesireManager.Desires.rawget(Desire.FEED_STATION).active = true;
 	foreach (town in BeliefManager.ActiveTownList) {
-		town.setDesire(Desire.FEED_STATION, true);
+		if (AITown.GetPopulation(town.TownId) > 400) {
+			town.setDesire(Desire.FEED_STATION, true);
+		}
 	}
 }
 
-//NOTDONE!
-//Currently does not create list of intentions.
-//Should consider other things than towns.
+// Now generates intentions from desires.
 function SW7AI::Filter() {
 	local activeDesires = {};
 	local townsToConsider = {};
@@ -87,14 +87,14 @@ function SW7AI::Filter() {
 	foreach (townid, sw7town in BeliefsManager.ActiveTownList) {
 		foreach (desire in activeDesires) {
 			if (sw7town.getDesireState(desire)) {
-				townsToConsider.rawset(townid, sw7town);	
+				townsToConsider.rawset(townid, sw7town);
 			}
 		}
 	}
 	
 	//Add FeedStationIntention
 	foreach (station, _ in BeliefsManager.StationsToFeed) {
-		if (AITown.GetPopulation(AIStation.GetNearestTown(station)) > 500) {
+		if (townsToConsider.rawin(AIStation.GetNearestTown(station))) {
 			AILog.Info(AIStation.GetName(station));
 			local fsI = FeedStationIntention(station);
 			foreach (Intention in Intentions) {
@@ -116,6 +116,10 @@ function SW7AI::Execute() {
 	if (Intentions.len() > 0) {
 		if (!Intentions[0].Execute()) {
 			AILog.Warning("Failed executing current Intention.");
+		} else {
+			if (Intentions[0] instanceof FeedStationIntention) {
+				BeliefsManager.AddServicedTown(BeliefsManager.ActiveTownList[Intentions[0].town]); //Add the SW7town that matches the serviced town's ID to list of Serviced towns.
+			}
 		}
 		Intentions.remove(0);
 	}
