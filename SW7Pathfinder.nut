@@ -60,7 +60,7 @@ function SW7Pathfinder::connect(tile_id_a, tile_id_b) {
 					} else {
 						local bridge_list = AIBridgeList_Length(AIMap.DistanceManhattan(path.GetTile(), par.GetTile()) + 1);
 						bridge_list.Valuate(AIBridge.GetMaxSpeed);
-						bridge_list.Sort(AIAbstractList.SORT_BY_VALUE, false);
+						bridge_list.Sort(AIList.SORT_BY_VALUE, false);
 						if (!AIBridge.BuildBridge(AIVehicle.VT_ROAD, bridge_list.Begin(), path.GetTile(), par.GetTile())) {
 							/* An error occured while building a bridge. TODO: handle it. */
 						}
