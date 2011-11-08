@@ -62,6 +62,11 @@ function FeedStationIntention::Execute() {
 						boArr.append(dbo);
 						boArr.append(rbo);
 						boArr.append(vbo);
+						
+						if (getCost(boArr) > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) {
+							return false;
+						}
+						
 						executeBuildOrders(boArr);
 						
 						AIOrder.AppendOrder(veh, cbsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
@@ -109,6 +114,15 @@ function FeedStationIntention::testDBO(tilelist) {
 	}
 	
 	return null;
+}
+
+function getCost(boarr) {
+	local cost = 0;
+	foreach (bo in boarr) {
+		cost += bo.cost;
+	}
+	
+	return cost;
 }
 
 

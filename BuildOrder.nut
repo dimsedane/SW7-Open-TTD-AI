@@ -1,8 +1,10 @@
 ﻿class BuildOrder {
 	IsExecutable = null;
-
+	cost = null;
+	
 	constructor () {
 		IsExecutable = false;
+		cost = 0;
 	}
 
 	/**
@@ -53,7 +55,8 @@ class BusStationBuildOrder extends BuildOrder {
 		
 		if (built) {
 			IsExecutable = true;
-			return accounting.GetCosts();
+			cost = accounting.GetCosts();
+			return true;
 		}
 		return null;
 	}
@@ -70,7 +73,8 @@ class VehicleBuildOrder extends BuildOrder {
 	
 	function test() {
 		IsExecutable = true;
-		return AIEngine.GetPrice(engine);
+		cost = AIEngine.GetPrice(engine);
+		return true;
 	}
 	
 	function execute() {
@@ -106,7 +110,8 @@ class RoadBuildOrder extends BuildOrder {
 		} else {
 			SW7Pathfinder.buildpath(path);
 			IsExecutable = true;
-			return accounting.GetCosts();
+			cost = accounting.GetCosts();
+			return true;
 		}
 	}
 	
@@ -138,7 +143,8 @@ class DepotBuildOrder extends BuildOrder {
 		
 		if (depotbuild) {
 			IsExecutable = true;
-			return accounting.GetCosts();
+			cost = accounting.GetCosts();
+			return true;
 		}
 		
 		return null;
