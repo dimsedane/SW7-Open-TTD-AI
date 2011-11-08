@@ -16,9 +16,10 @@ class BeliefManager {
 	//Considers train stations only!
 	StationsToFeed = null;
 	
-	CurrentMoney = 0;
-	CurrentLoan = 0;
-	CurrentMaxLoan = 0;
+	CurrentMoney = null;
+	CurrentLoan = null;
+	CurrentMaxLoan = null;
+	LoanInterval = null;
 	
 	constructor() {
 		PaxCargoId = this.getPaxCargoId();
@@ -38,9 +39,10 @@ class BeliefManager {
 function BeliefManager::Update() {
 	CurrentTownList.UpdateTownList();
 	
-	CurrentLoan = AICompany.GetLoanAmount();
-	CurrentMoney = AICompany.GetBankBalance(AICompany.COMPANY_SELF);
-	CurrentMaxLoan = AICompany.GetMaxLoanAmount();
+	CurrentLoan = AICompany.GetLoanAmount(); //Amount currently loaned
+	CurrentMoney = AICompany.GetBankBalance(AICompany.COMPANY_SELF); //Current balance
+	CurrentMaxLoan = AICompany.GetMaxLoanAmount(); //Max loan
+	LoanInterval = AICompany.GetLoanInterval();
 	
 	StationsToFeed = AIStationList(AIStation.STATION_TRAIN);
 	StationsToFeed.RemoveList(AIStationList(AIStation.STATION_BUS_STOP));

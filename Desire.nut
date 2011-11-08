@@ -1,5 +1,6 @@
 class Desire {
 	FEED_STATION = 1;
+	ECONOMICALLY_RESPONSIBLE = 2;
 	
 	active = null;
 	DesireType = null;

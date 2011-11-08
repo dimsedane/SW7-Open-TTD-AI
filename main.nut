@@ -9,6 +9,7 @@ require("SW7Pathfinder.nut");
 require("SW7MEUP.nut");
 require("TileListGenerator.nut");
 require("BuildOrder.nut");
+require("RepayLoanIntention.nut");
 
 class SW7AI extends AIController
 {
@@ -65,15 +66,25 @@ function SW7AI::BRF() {
 //Instantly activates FEED_STATION desire. 
 //This is supposed to be done only if beliefs match.
 function SW7AI::GenerateDesires() {
-	DesireManager.Desires.rawget(Desire.FEED_STATION).active = true;
-	foreach (town in BeliefManager.ActiveTownList) {
-		if (AITown.GetPopulation(town.TownId) > 400) {
-			town.setDesire(Desire.FEED_STATION, true);
+	if (BeliefsManager.StationsToFeed.Count() > 0) {
+		DesireManager.Desires.rawget(Desire.FEED_STATION).active = true;
+		
+		foreach (town in BeliefManager.ActiveTownList) {
+			if (AITown.GetPopulation(town.TownId) > 400) {
+				town.setDesire(Desire.FEED_STATION, true);
+			}
 		}
+	} else {
+		DesireManager.Desires.rawget(Desire.FEED_STATION).active = false;
+	}
+	if (BeliefsManager.CurrentMoney > BeliefsManager.LoanInterval) {
+		DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active = true;
+	} else {
+		DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active = false;
 	}
 }
 
-// Now generates intentions from desires.
+// Generates intentions from desires.
 function SW7AI::Filter() {
 	local activeDesires = {};
 	local townsToConsider = {};
@@ -84,29 +95,42 @@ function SW7AI::Filter() {
 		}
 	}
 	
-	foreach (townid, sw7town in BeliefsManager.ActiveTownList) {
-		foreach (desire in activeDesires) {
-			if (sw7town.getDesireState(desire)) {
-				townsToConsider.rawset(townid, sw7town);
-			}
-		}
-	}
-	
-	//Add FeedStationIntention
-	foreach (station, _ in BeliefsManager.StationsToFeed) {
-		if (townsToConsider.rawin(AIStation.GetNearestTown(station))) {
-			local fsI = FeedStationIntention(station);
-			foreach (Intention in Intentions) {
-				if (Intention instanceof FeedStationIntention) {
-					if (Intention.Station == station) {
-						fsI = null;
-					}
+	if (activeDesires.rawin(Desire.FEED_STATION)) {
+		foreach (townid, sw7town in BeliefsManager.ActiveTownList) {
+			foreach (desire in activeDesires) {
+				if (sw7town.getDesireState(desire)) {
+					townsToConsider.rawset(townid, sw7town);
 				}
 			}
-			
-			if (fsI != null) {
-				Intentions.append(fsI);
+		}
+	
+		//Add FeedStationIntention
+		foreach (station, _ in BeliefsManager.StationsToFeed) {
+			if (townsToConsider.rawin(AIStation.GetNearestTown(station))) {
+				local fsI = FeedStationIntention(station);
+				foreach (Intention in Intentions) {
+					if (Intention instanceof FeedStationIntention) {
+						if (Intention.Station == station) {
+							fsI = null;
+						}
+					}
+				}
+				
+				if (fsI != null) {
+					Intentions.append(fsI);
+				}
 			}
+		}
+	} else if (activeDesires.rawin(Desire.ECONOMICALLY_RESPONSIBLE)) {
+		local alreadyAdded = false;
+		foreach (Intention in Intentions) {
+			if (Intention instanceof RepayLoanIntention) {
+				alreadyAdded = true;
+			}
+		}
+		
+		if (!alreadyAdded) {
+			Intentions.append(RepayLoanIntention(BeliefsManager));
 		}
 	}
 }
