@@ -27,7 +27,7 @@
 				}
 			}
 		}
-	
+		list.Sort(AIList.SORT_BY_VALUE, true);
 		return list;
 	}
 	

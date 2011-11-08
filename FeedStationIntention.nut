@@ -19,16 +19,11 @@ function FeedStationIntention::Execute() {
 	local loc = AITown.GetLocation(town);
 	
 	local options = AITileList();
-	local extendBusStationTile = null;
-	local centreStationTile = null;
 	local stationLocation = AIStation.GetLocation(Station);
 	
 	options = TileListGenerator.generateNear(stationLocation, 10);
 	
-	options.Sort(AIList.SORT_BY_VALUE, true);
-	
 	local ebsbo = null;
-	local cbsbo = null;
 	foreach (tile, _ in options) {
 		ebsbo = BusStationBuildOrder(tile, Station);
 		if (ebsbo.test() != null) {
@@ -38,10 +33,9 @@ function FeedStationIntention::Execute() {
 	}
 	
 	if (ebsbo != null) {
-		extendBusStationTile = ebsbo.tile;
-	
 		options = TileListGenerator.generateFlatRoadTilesNear(AITown.GetLocation(town), 5);
-		options = SW7MEUP.optimize(options, [extendBusStationTile]);
+		options = SW7MEUP.optimize(options, [ebsbo.tile]);
+		local cbsbo = null;
 		
 		foreach (tile, _ in options) {
 			cbsbo = BusStationBuildOrder(tile, AIStation.STATION_NEW);
@@ -54,7 +48,6 @@ function FeedStationIntention::Execute() {
 		if (cbsbo != null) {
 			options = TileListGenerator.generateDepotTiles(town);
 			local dbo = null;
-			local depottile = null;
 			
 			foreach (tile, front in options) {
 				dbo = DepotBuildOrder(tile, front);
@@ -65,17 +58,17 @@ function FeedStationIntention::Execute() {
 			}
 			
 			if (dbo != null) {
-				local depottile = dbo.location;
+				local rbo = RoadBuildOrder(dbo.front, ebsbo.tile);
+				if (rbo.test() == null) {
+					rbo = null;
+				}
 				
-				local rbo = RoadBuildOrder(dbo.front, extendBusStationTile);
-				local rbot = rbo.test();
-				
-				if (rbot != null) {
+				if (rbo != null) {
 					local engList = SW7MEUP.GetRoadVehicle(SW7MEUP.RV_PARAM_HIGH_CARGO_CAPACITY);
 					local vbo = null;
 					
 					foreach (engL, _ in engList) {
-						vbo = VehicleBuildOrder(depottile, engL);
+						vbo = VehicleBuildOrder(dbo.location, engL);
 						if (vbo.test() != null) {
 							break;
 						}
@@ -83,17 +76,17 @@ function FeedStationIntention::Execute() {
 					}
 					
 					if (vbo != null) {
-						extendBusStationTile = ebsbo.execute();
-						centreStationTile = cbsbo.execute();
-						depottile = dbo.execute();
-						rbot = rbo.execute();
+						ebsbo.execute();
+						cbsbo.execute();
+						dbo.execute();
+						rbo.execute();
 						
-						AIRoad.BuildRoad(depottile, dbo.front);
+						AIRoad.BuildRoad(dbo.location, dbo.front);
 						
-						vbo.depot = depottile;
+						vbo.depot = dbo.location;
 						local veh = vbo.execute();
-						AIOrder.AppendOrder(veh, centreStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
-						AIOrder.AppendOrder(veh, extendBusStationTile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+						AIOrder.AppendOrder(veh, cbsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+						AIOrder.AppendOrder(veh, ebsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
 						AIVehicle.StartStopVehicle(veh);
 						
 						return true;
