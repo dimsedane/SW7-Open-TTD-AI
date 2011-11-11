@@ -25,6 +25,8 @@ function FeedStationIntention::Execute() {
 	local options = AITileList();
 	local stationLocation = AIStation.GetLocation(Station);
 	
+	if (!TownIsBuildable()) return false;
+	
 	options = TileListGenerator.generateNear(stationLocation, 10);
 	
 	local ebsbo = TestExtensionStationBO(options);
@@ -69,11 +71,13 @@ function FeedStationIntention::Execute() {
 						
 						executeBuildOrders(boArr);
 						
-						AIOrder.AppendOrder(veh, cbsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
-						AIOrder.AppendOrder(veh, ebsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
-						AIVehicle.StartStopVehicle(veh);
+						if (veh != false) {
+							AIOrder.AppendOrder(veh, cbsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+							AIOrder.AppendOrder(veh, ebsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+							AIVehicle.StartStopVehicle(veh);
 						
-						return true;
+							return true;
+						}
 					}
 				}
 			}
@@ -140,4 +144,27 @@ function FeedStationIntention::executeBuildOrders(buildOrderArray) {
 			bo.execute();
 		}		
 	}	
+}
+
+function FeedStationIntention::TownIsBuildable() {
+	switch(AITown.GetRating(town, AICompany.COMPANY_SELF)) {
+		case AITown.TOWN_RATING_APPALLING:
+		case AITown.TOWN_RATING_VERY_POOR:
+			AILog.Info("Town " + town + " rates our company too low. Now we're doomed!");
+			return false;
+			break;
+		case AITown.TOWN_RATING_POOR:
+		case AITown.TOWN_RATING_MEDIOCRE:
+		case AITown.TOWN_RATING_GOOD:
+		case AITown.TOWN_RATING_VERY_GOOD:
+		case AITown.TOWN_RATING_EXCELLENT:
+		case AITown.TOWN_RATING_OUTSTANDING:
+		case AITown.TOWN_RATING_NONE:
+			return true;
+			break;
+		case AITown.TOWN_RATING_INVALID:
+			AILog.Error("Invalid town!");
+			return false;
+			break;
+	}
 }

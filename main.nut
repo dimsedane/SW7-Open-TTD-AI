@@ -136,6 +136,7 @@ function SW7AI::Filter() {
 }
 
 function SW7AI::Execute() {
+	AILog.Info("Executing Intention");
 	if (Intentions.len() > 0) {
 		if (!Intentions[0].Execute()) {
 			AILog.Warning("Failed executing current Intention.");
