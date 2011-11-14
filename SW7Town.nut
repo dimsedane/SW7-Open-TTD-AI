@@ -13,7 +13,7 @@ class SW7Town extends AITown {
 	 * Add a station to the list of stations of the town.
 	 */
 	function AddStation(Station) {
-		Station.AddItem(Station,0);
+		Stations.AddItem(Station,0);
 	}
 	
 	/**

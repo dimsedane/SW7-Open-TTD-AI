@@ -126,6 +126,7 @@ function SW7AI::Filter() {
 		foreach (Intention in Intentions) {
 			if (Intention instanceof RepayLoanIntention) {
 				alreadyAdded = true;
+				break;
 			}
 		}
 		
@@ -136,16 +137,17 @@ function SW7AI::Filter() {
 }
 
 function SW7AI::Execute() {
-	AILog.Info("Executing Intention");
 	if (Intentions.len() > 0) {
 		if (!Intentions[0].Execute()) {
 			AILog.Warning("Failed executing current Intention.");
 		} else {
 			if (Intentions[0] instanceof FeedStationIntention) {
-				BeliefsManager.AddServicedTown(BeliefsManager.ActiveTownList[Intentions[0].town]); //Add the SW7town that matches the serviced town's ID to list of Serviced towns.
+				BeliefsManager.AddServicedTown(Intentions[0].town); //Add the SW7town that matches the serviced town's ID to list of Serviced towns.
 			}
 		}
 		Intentions.remove(0);
+	} else {
+		AIController.Sleep(100);
 	}
 }
 

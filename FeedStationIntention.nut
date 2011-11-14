@@ -6,7 +6,7 @@
 	
 	constructor(_station) {
 		this.Station = _station;
-		this.town = AIStation.GetNearestTown(_station);
+		this.town = SW7Town(AIStation.GetNearestTown(_station));
 	}
 	
     /** 
@@ -20,13 +20,13 @@ function FeedStationIntention::Execute() {
 	local boArr = [];
 	
 	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
-	local loc = AITown.GetLocation(town);
+	local loc = town.GetLocation();
 	
 	local options = AITileList();
 	local stationLocation = AIStation.GetLocation(Station);
 	
 	if (!TownIsBuildable()) {
-		AILog.Info("Town is not buildable.");
+		AILog.Warning("Town is not buildable.");
 		return false;
 	}
 	
@@ -35,12 +35,12 @@ function FeedStationIntention::Execute() {
 	local ebsbo = TestExtensionStationBO(options);
 	
 	if (ebsbo != null) {
-		options = TileListGenerator.generateFlatRoadTilesNear(AITown.GetLocation(town), 5);
+		options = TileListGenerator.generateFlatRoadTilesNear(town.GetLocation(), 5);
 		options = SW7MEUP.optimize(options, [ebsbo.tile]);
 		local cbsbo = TestCentralStationBO(options);
 				
 		if (cbsbo != null) {
-			options = TileListGenerator.generateDepotTiles(town);
+			options = TileListGenerator.generateDepotTiles(town.TownId);
 			local dbo = testDBO(options);
 			
 			if (dbo != null) {
@@ -69,12 +69,12 @@ function FeedStationIntention::Execute() {
 						boArr.append(vbo);
 						
 						if (getCost(boArr) > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) {
-							AILog.Info(getCost(boArr) + " " + AICompany.GetBankBalance(AICompany.COMPANY_SELF));
 							AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
-							AILog.Info(AICompany.GetLoanAmount()); 
 						}
 						
 						executeBuildOrders(boArr);
+						town.AddStation(ebsbo.tile);
+						town.AddStation(cbsbo.tile);
 						
 						if (veh != false) {
 							AIOrder.AppendOrder(veh, cbsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
@@ -164,10 +164,10 @@ function FeedStationIntention::executeBuildOrders(buildOrderArray) {
 }
 
 function FeedStationIntention::TownIsBuildable() {
-	switch(AITown.GetRating(town, AICompany.COMPANY_SELF)) {
+	switch(AITown.GetRating(town.TownId, AICompany.COMPANY_SELF)) {
 		case AITown.TOWN_RATING_APPALLING:
 		case AITown.TOWN_RATING_VERY_POOR:
-			AILog.Info("Town " + town + " rates our company too low. Now we're doomed!");
+			AILog.Info("Town " + town.TownId + " rates our company too low. Now we're doomed!");
 			return false;
 			break;
 		case AITown.TOWN_RATING_POOR:
