@@ -66,15 +66,21 @@ function SW7AI::BRF() {
 
 function SW7AI::GenerateDesires() {
 	if (BeliefsManager.StationsToFeed.Count() > 0) {
+		local t = null;
+		local set = false;
+		local des = Desire(Desire.FEED_STATION);
 		DesireManager.Desires.rawget(Desire.FEED_STATION).active = true;
 		
-		foreach (town in BeliefManager.ActiveTownList) {
-			if (AITown.GetPopulation(town.TownId) > 400) {
-				town.setDesire(Desire.FEED_STATION, true);
+		foreach (town in BeliefsManager.ActiveTownList) {
+			
+			if (town.GetPopulation() > 400) {
+				town.setDesire(des, true);
+				set = true;
+			} else {
+				town.setDesire(des, false);
 			}
 		}
-	} else {
-		DesireManager.Desires.rawget(Desire.FEED_STATION).active = false;
+		if (!set) DesireManager.Desires.rawget(des).active = false;
 	}
 	
 	if (BeliefsManager.CurrentMoney > BeliefsManager.LoanInterval) {
@@ -84,23 +90,21 @@ function SW7AI::GenerateDesires() {
 	}
 	
 	if (BeliefsManager.CurrentServicedTownsList.len() > 0) {
-		local ExtendTown = false;
+		local TownToExtend = false;
 		foreach (town in BeliefsManager.CurrentServicedTownsList) {
 			local popl = town.GetPopulation();
-			local stCount = 0.00000001 * popl * popl + 0.001 * popl + 2.25;
-			
-			if (stCount > town.Stations.Count() + 1) {
-				town.setDesire(Desire.EXTEND_FEEDER_NETWORK, true);
-				ExtendTown = true;
+			local stMax = 0.00000001 * popl * popl + 0.001 * popl + 2.25;
+			local des = Desire(Desire.EXTEND_FEEDER_NETWORK);
+			if (stMax > (town.Stations.Count())) {
+				town.setDesire(des, true);
+				AILog.Info("Desires to extend " + AITown.GetName(town.TownId));
+				TownToExtend = true;
 			} else {
-				town.setDesire(Desire.EXTEND_FEEDER_NETWORK, false);
+				town.setDesire(des, false);
+				AILog.Info(AITown.GetName(town.TownId) + " has sufficient amount of stations.");
 			}
 		}
-		if (ExtendTown) {
-			desireManager.Desires.rawget(Desire.EXTEND_FEEDER_NETWORK).active = true;
-		} else {
-			desireManager.Desires.rawget(Desire.EXTEND_FEEDER_NETWORK).active = false;
-		}
+		if (TownToExtend) DesireManager.Desires.rawget(Desire.EXTEND_FEEDER_NETWORK).active = false;
 	}
 }
 
@@ -116,14 +120,14 @@ function SW7AI::Filter() {
 	}
 	
 	if (activeDesires.rawin(Desire.FEED_STATION)) {
+		local feedDes = activeDesires.rawget(Desire.FEED_STATION);
 		foreach (townid, sw7town in BeliefsManager.ActiveTownList) {
-			foreach (desire in activeDesires) {
-				if (sw7town.getDesireState(desire)) {
-					townsToConsider.rawset(townid, sw7town);
-				}
+			
+			if (sw7town.getDesireState(feedDes)) {
+				townsToConsider.rawset(townid, sw7town);
 			}
 		}
-	
+		
 		//Add FeedStationIntention
 		foreach (station, _ in BeliefsManager.StationsToFeed) {
 			if (townsToConsider.rawin(AIStation.GetNearestTown(station))) {
@@ -138,12 +142,14 @@ function SW7AI::Filter() {
 				
 				if (fsI != null) {
 					Intentions.append(fsI);
+					AILog.Info("Added FSIntention.");
 				}
 			}
 		}
 	} 
 	
 	if (activeDesires.rawin(Desire.ECONOMICALLY_RESPONSIBLE)) {
+		AILog.Info("Economically responsible desire active");
 		local alreadyAdded = false;
 		foreach (Intention in Intentions) {
 			if (Intention instanceof RepayLoanIntention) {
@@ -153,12 +159,31 @@ function SW7AI::Filter() {
 		}
 		
 		if (!alreadyAdded) {
+			AILog.Info("Added Econ. intention.");
 			Intentions.append(RepayLoanIntention(BeliefsManager));
 		}
 	}
 	
 	if (activeDesires.rawin(Desire.EXTEND_FEEDER_NETWORK)) {
-		AILog.Info("EXTEND");
+		AILog.Info("Extend Feeder network active");
+		local des = activeDesires.rawget(Desire.EXTEND_FEEDER_NETWORK);
+		foreach (town in BeliefsManager.CurrentServicedTownsList) {
+			if (town.getDesireState(des)) {
+				local efnI = ExtendNetworkIntention(town);
+				foreach (Intention in Intentions) {
+					if (Intention instanceof ExtendNetworkIntention) {
+						if (Intention.sw7town == town) {
+							efnI = null;
+						}
+					}
+				}
+				
+				if (efnI != null) {
+					AILog.Info("Added Extend Feeder Intention.");
+					Intentions.append(efnI);
+				}
+			}
+		}
 	}
 }
 
@@ -173,7 +198,7 @@ function SW7AI::Execute() {
 		}
 		Intentions.remove(0);
 	} else {
-		AIController.Sleep(100);
+		AIController.Sleep(10);
 	}
 }
 

@@ -77,6 +77,7 @@ function FeedStationIntention::Execute() {
 						town.AddStation(cbsbo.tile);
 						
 						if (veh != false) {
+							town.AddVehicle(veh);
 							AIOrder.AppendOrder(veh, cbsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
 							AIOrder.AppendOrder(veh, ebsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
 							AIVehicle.StartStopVehicle(veh);

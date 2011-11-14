@@ -8,7 +8,7 @@ class BeliefManager {
 	 */
 	ActiveTownList = {};
 	/**
-	 * Not used currently.
+	 * Towns that currently have a feeder station.
 	 */
 	CurrentServicedTownsList = {};
 	PaxCargoId = null;
@@ -50,6 +50,7 @@ function BeliefManager::Update() {
 	foreach (station, _ in StationsToFeed) {
 		local townid = AIStation.GetNearestTown(station);
 		ActiveTownList.rawset(townid, SW7Town(townid));
+		ActiveTownList.rawget(townid).InitiateDesires();
 	}
 }
 
