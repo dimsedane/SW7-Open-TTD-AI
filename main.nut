@@ -10,6 +10,7 @@ require("SW7MEUP.nut");
 require("TileListGenerator.nut");
 require("BuildOrder.nut");
 require("RepayLoanIntention.nut");
+require("ExtendNetworkIntention.nut");
 
 class SW7AI extends AIController
 {
@@ -63,8 +64,6 @@ function SW7AI::BRF() {
 	BeliefsManager.Update();
 }
 
-//Instantly activates FEED_STATION desire. 
-//This is supposed to be done only if beliefs match.
 function SW7AI::GenerateDesires() {
 	if (BeliefsManager.StationsToFeed.Count() > 0) {
 		DesireManager.Desires.rawget(Desire.FEED_STATION).active = true;
@@ -77,10 +76,31 @@ function SW7AI::GenerateDesires() {
 	} else {
 		DesireManager.Desires.rawget(Desire.FEED_STATION).active = false;
 	}
+	
 	if (BeliefsManager.CurrentMoney > BeliefsManager.LoanInterval) {
 		DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active = true;
 	} else {
 		DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active = false;
+	}
+	
+	if (BeliefsManager.CurrentServicedTownsList.len() > 0) {
+		local ExtendTown = false;
+		foreach (town in BeliefsManager.CurrentServicedTownsList) {
+			local popl = town.GetPopulation();
+			local stCount = 0.00000001 * popl * popl + 0.001 * popl + 2.25;
+			
+			if (stCount > town.Stations.Count() + 1) {
+				town.setDesire(Desire.EXTEND_FEEDER_NETWORK, true);
+				ExtendTown = true;
+			} else {
+				town.setDesire(Desire.EXTEND_FEEDER_NETWORK, false);
+			}
+		}
+		if (ExtendTown) {
+			desireManager.Desires.rawget(Desire.EXTEND_FEEDER_NETWORK).active = true;
+		} else {
+			desireManager.Desires.rawget(Desire.EXTEND_FEEDER_NETWORK).active = false;
+		}
 	}
 }
 
@@ -121,7 +141,9 @@ function SW7AI::Filter() {
 				}
 			}
 		}
-	} else if (activeDesires.rawin(Desire.ECONOMICALLY_RESPONSIBLE)) {
+	} 
+	
+	if (activeDesires.rawin(Desire.ECONOMICALLY_RESPONSIBLE)) {
 		local alreadyAdded = false;
 		foreach (Intention in Intentions) {
 			if (Intention instanceof RepayLoanIntention) {
@@ -133,6 +155,10 @@ function SW7AI::Filter() {
 		if (!alreadyAdded) {
 			Intentions.append(RepayLoanIntention(BeliefsManager));
 		}
+	}
+	
+	if (activeDesires.rawin(Desire.EXTEND_FEEDER_NETWORK)) {
+		AILog.Info("EXTEND");
 	}
 }
 

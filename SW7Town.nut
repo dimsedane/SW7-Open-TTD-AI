@@ -24,6 +24,13 @@ class SW7Town extends AITown {
 	}
 	
 	/**
+	 * Wrapper for retrieving town population.
+	 */
+	function GetPopulation() {
+		return ::AITown.GetPopulation(TownId);
+	}
+	
+	/**
 	 * Initiate desires for the town. (IE.: Set all desires to false).
 	 */
 	function InitiateDesires() {
