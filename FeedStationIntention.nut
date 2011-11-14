@@ -25,7 +25,10 @@ function FeedStationIntention::Execute() {
 	local options = AITileList();
 	local stationLocation = AIStation.GetLocation(Station);
 	
-	if (!TownIsBuildable()) return false;
+	if (!TownIsBuildable()) {
+		AILog.Info("Town is not buildable.");
+		return false;
+	}
 	
 	options = TileListGenerator.generateNear(stationLocation, 10);
 	
@@ -66,7 +69,9 @@ function FeedStationIntention::Execute() {
 						boArr.append(vbo);
 						
 						if (getCost(boArr) > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) {
-							return false;
+							AILog.Info(getCost(boArr) + " " + AICompany.GetBankBalance(AICompany.COMPANY_SELF));
+							AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
+							AILog.Info(AICompany.GetLoanAmount()); 
 						}
 						
 						executeBuildOrders(boArr);
@@ -77,11 +82,23 @@ function FeedStationIntention::Execute() {
 							AIVehicle.StartStopVehicle(veh);
 						
 							return true;
+						} else {
+							AILog.Info("Vehicle not created.");
 						}
+					} else {
+						AILog.Info("Vehicle build order was incorret.");
 					}
+				} else {
+					AILog.Info("Road building creation failed.");
 				}
+			} else {
+				AILog.Info("Depot creation failed.");
 			}
+		} else {
+			AILog.Info("Centre bus station creation failed.");
 		}
+	} else {
+		AILog.Info("Extended bus station creation failed.");
 	}
 	return false;
 }

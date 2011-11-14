@@ -45,15 +45,21 @@
 	
 	function generateDepotTiles(town) {
 		local depottiles = AITileList();
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(14, 1), AITown.GetLocation(town) + AIMap.GetTileIndex(14, 0));
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(14, -1), AITown.GetLocation(town) + AIMap.GetTileIndex(14, 0));
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-14, 1), AITown.GetLocation(town) + AIMap.GetTileIndex(-14, 0));
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-14, -1), AITown.GetLocation(town) + AIMap.GetTileIndex(-14, 0));
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, 14), AITown.GetLocation(town) + AIMap.GetTileIndex(0, 14));
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, -14), AITown.GetLocation(town) + AIMap.GetTileIndex(0, -14));
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, 14), AITown.GetLocation(town) + AIMap.GetTileIndex(0, 14));
-		depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, -14), AITown.GetLocation(town) + AIMap.GetTileIndex(0, -14));
-		
+		local i = 0;
+		for (i = 5; i < 15; i++) {
+			if (i == 8 || i == 12) i++; //Ignore tiles that should contain crossroads
+			
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(i, 1), AITown.GetLocation(town) + AIMap.GetTileIndex(i, 0));
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(i, -1), AITown.GetLocation(town) + AIMap.GetTileIndex(i, 0));
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-i, 1), AITown.GetLocation(town) + AIMap.GetTileIndex(-i, 0));
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-i, -1), AITown.GetLocation(town) + AIMap.GetTileIndex(-i, 0));
+			
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, i), AITown.GetLocation(town) + AIMap.GetTileIndex(0, i));
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(1, -i), AITown.GetLocation(town) + AIMap.GetTileIndex(0, -i));
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, i), AITown.GetLocation(town) + AIMap.GetTileIndex(0, i));
+			depottiles.AddItem(AITown.GetLocation(town) + AIMap.GetTileIndex(-1, -i), AITown.GetLocation(town) + AIMap.GetTileIndex(0, -i));
+			
+		}
 		return depottiles;
 	}
 }
