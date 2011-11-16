@@ -47,15 +47,14 @@ function BeliefManager::Update() {
 	StationsToFeed = AIStationList(AIStation.STATION_TRAIN);
 	StationsToFeed.RemoveList(AIStationList(AIStation.STATION_BUS_STOP));
 	
-	foreach (tid, sw7t in AllTownsList) {
-		sw7t.active = false;
-	}
-	
-	foreach (station, _ in StationsToFeed) {
-		local townid = AIStation.GetNearestTown(station);
-		sw7t = AllTownsList.rawget(townid);
-		sw7t.active = true;
-		sw7t.InitiateDesires();
+	foreach (townid, town in AllTownsList.towns) {
+		town.active = false;
+		foreach (station, _ in StationsToFeed) {
+			if (AIStation.GetNearestTown(station) == townid) {
+				town.active = true;
+				break;
+			}
+		}
 	}
 }
 

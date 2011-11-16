@@ -8,5 +8,6 @@ class Desire {
 	
 	constructor(_desire_type) {
 		DesireType = _desire_type;
+		active = false;
 	}
 }

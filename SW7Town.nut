@@ -1,7 +1,7 @@
 class SW7Town extends AITown {
 	Stations = null;
 	TownId = null;
-	ActiveDesires = {};
+	ActiveDesires = null;
 	Vehicles = null;
 	active = null;
 	
@@ -10,8 +10,9 @@ class SW7Town extends AITown {
 		Stations = AIList();
 		TownId = _TownId;
 		Vehicles = AIList();
-		InitiateDesires();
 		active = false;
+		ActiveDesires = {};
+		InitiateDesires();
 	}
 	
 	/**
@@ -56,7 +57,7 @@ class SW7Town extends AITown {
 	 * Set a new state for a desire.
 	 */
 	function setDesire(desire, state) {
-		ActiveDesires.rawget(desire.DesireType).active = state;
+		ActiveDesires.rawget(desire).active = state;
 	}
 	
 	/**
@@ -65,9 +66,13 @@ class SW7Town extends AITown {
 	 * (IE. If town does not have desire, it is not necessary to check globally).
 	 */
 	function getDesireState(desire) {
-		if (ActiveDesires.rawin(desire.DesireType) && ActiveDesires.rawget(desire.DesireType).active) {
-			if (DesireManager.Desires.rawin(desire.DesireType)) {
-				return DesireManager.Desires.rawget(desire.DesireType).active;
+		if (ActiveDesires.rawin(desire)) {
+			if (ActiveDesires.rawget(desire).active) {
+				if (DesireManager.Desires.rawget(desire).active) {
+					return true;
+				} else {
+					return false;
+				}
 			} else {
 				return false;
 			}

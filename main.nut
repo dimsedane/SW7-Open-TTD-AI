@@ -64,6 +64,12 @@ class SW7AI extends AIController
 	function ActivateERDesire();
 	
 	function ActivateEFNDesire();
+
+	function GenerateFSIntentions();
+	
+	function GenerateERIntentions();
+	
+	function GenerateEFNIntentions();
 }
 
 function SW7AI::BRF() {
@@ -78,72 +84,9 @@ function SW7AI::GenerateDesires() {
 
 // Generates intentions from desires.
 function SW7AI::Filter() {
-	local townsToConsider = {};
-	
-	local feedDes = DesireManager.Desires.rawget(Desire.FEED_STATION);
-	if (feedDes.active) {
-		
-		foreach (townid, sw7town in BeliefsManager.AllTownsList) {
-			if (sw7town.getDesireState(feedDes)) {
-				townsToConsider.rawset(townid, sw7town);
-			}
-		}
-		
-		//Add FeedStationIntention
-		foreach (station, _ in BeliefsManager.StationsToFeed) {
-			if (townsToConsider.rawin(AIStation.GetNearestTown(station))) {
-				local fsI = FeedStationIntention(station);
-				foreach (Intention in Intentions) {
-					if (Intention instanceof FeedStationIntention) {
-						if (Intention.Station == station) {
-							fsI = null;
-						}
-					}
-				}
-				
-				if (fsI != null) {
-					Intentions.append(fsI);
-				}
-			}
-		}
-	}
-	
-	if (DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active) {
-		local alreadyAdded = false;
-		foreach (Intention in Intentions) {
-			if (Intention instanceof RepayLoanIntention) {
-				alreadyAdded = true;
-				break;
-			}
-		}
-		
-		if (!alreadyAdded) {
-			Intentions.append(RepayLoanIntention(BeliefsManager));
-		}
-	}
-	
-	local des = DesireManager.Desires.rawget(Desire.EXTEND_FEEDER_NETWORK);
-	if (des.active) {
-		AILog.Info("Intentions before EFN: " + Intentions.len());
-		
-		foreach (town in BeliefsManager.CurrentServicedTownsList) {
-			if (town.getDesireState(des)) {
-				local efnI = ExtendNetworkIntention(town);
-				foreach (Intention in Intentions) {
-					if (Intention instanceof ExtendNetworkIntention) {
-						if (Intention.sw7town == town) {
-							efnI = null;
-						}
-					}
-				}
-				
-				if (efnI != null) {
-					Intentions.append(efnI);
-				}
-			}
-		}
-		AILog.Info("Intentions after EFN: " + Intentions.len());
-	}
+	GenerateFSIntentions();
+	GenerateERIntentions();
+	GenerateEFNIntentions();
 }
 
 function SW7AI::Execute() {
@@ -171,24 +114,17 @@ function SW7AI::InitializeState() {
 }
 
 function SW7AI::ActivateFSDesire() {
-	local des = Desire(Desire.FEED_STATION);
+	local des = (Desire.FEED_STATION);
 	
 	if (BeliefsManager.StationsToFeed.Count() == 0) {
-		DesireManager.Desires.rawget(des.DesireType).active = false;
+		DesireManager.Desires.rawget(des).active = false;
 	} else {
-		DesireManager.Desires.rawget(des.DesireType).active = true;
+		DesireManager.Desires.rawget(des).active = true;
 
-		foreach (sw7Town, _ in BeliefsManager.AllTownsList) {
-			
-			town.setDesire(des, (town.GetPopulation() > 400));
-		}
-	}
-	
-	if (DesireManager.Desires.rawget(des.DesireType).active) {
-		foreach (town in BeliefsManager.ActiveTownList) {
-			AILog.Info(town.getDesireState(des) + " XXX " + town.GetName());
-			AILog.Info(DesireManager.Desires.rawget(des.DesireType).active);
-			AILog.Info(town.ActiveDesires.rawget(des.DesireType).active + " YYY");
+		foreach (id, town in BeliefsManager.AllTownsList.towns) {
+			if (town.active) {
+				town.setDesire(des, (town.GetPopulation() > 400));
+			}
 		}
 	}
 }
@@ -202,20 +138,90 @@ function SW7AI::ActivateERDesire() {
 }
 
 function SW7AI::ActivateEFNDesire() {
-	local set = false;
+	local townsToExtend = false;
+	local des = Desire.EXTEND_FEEDER_NETWORK;
 	
 	foreach (sTown in BeliefsManager.CurrentServicedTownsList) {
 		local popl = sTown.GetPopulation();
 		local stMax = 0.00000001 * popl * popl + 0.001 * popl + 2.25;
-		local des = Desire(Desire.EXTEND_FEEDER_NETWORK);
 		
 		if (stMax >= (sTown.Stations.Count() + 1)) {
 			sTown.setDesire(des, true);
-			set = true;
+			townsToExtend = true;
 		} else {
 			sTown.setDesire(des, false);
 		}
 	}
 	
-	DesireManager.Desires.rawget(Desire.EXTEND_FEEDER_NETWORK).active = set;
+	DesireManager.Desires.rawget(des).active = townsToExtend;
+}
+
+function SW7AI::GenerateFSIntentions() {
+	local townsToConsider = {};
+	local feedDes = DesireManager.Desires.rawget(Desire.FEED_STATION);
+	
+	if (feedDes.active) {
+		foreach (townid, sw7town in BeliefsManager.AllTownsList.towns) {
+			if (sw7town.active && sw7town.getDesireState(Desire.FEED_STATION)) {
+				townsToConsider.rawset(townid, sw7town);
+			}
+		}
+		
+		//Add FeedStationIntention
+		foreach (station, _ in BeliefsManager.StationsToFeed) {
+			if (townsToConsider.rawin(AIStation.GetNearestTown(station))) {
+				local fsI = FeedStationIntention(station);
+				foreach (Intention in Intentions) {
+					if (Intention instanceof FeedStationIntention) {
+						if (Intention.Station == station) {
+							fsI = null;
+						}
+					}
+				}
+				
+				if (fsI != null) {
+					Intentions.append(fsI);
+				}
+			}
+		}
+	}
+	//AILog.Info("After intentions: " + Intentions.len());
+}
+
+function SW7AI::GenerateERIntentions() {
+	if (DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active) {
+		local alreadyAdded = false;
+		foreach (Intention in Intentions) {
+			if (Intention instanceof RepayLoanIntention) {
+				alreadyAdded = true;
+				break;
+			}
+		}
+		
+		if (!alreadyAdded) {
+			Intentions.append(RepayLoanIntention(BeliefsManager));
+		}
+	}
+}
+
+function SW7AI::GenerateEFNIntentions() {
+	local des = DesireManager.Desires.rawget(Desire.EXTEND_FEEDER_NETWORK);
+	if (des.active) {
+		foreach (town in BeliefsManager.CurrentServicedTownsList) {
+			if (town.getDesireState(Desire.EXTEND_FEEDER_NETWORK)) {
+				local efnI = ExtendNetworkIntention(town);
+				foreach (Intention in Intentions) {
+					if (Intention instanceof ExtendNetworkIntention) {
+						if (Intention.sw7town == town) {
+							efnI = null;
+						}
+					}
+				}
+				
+				if (efnI != null) {
+					Intentions.append(efnI);
+				}
+			}
+		}
+	}
 }
