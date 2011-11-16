@@ -26,7 +26,7 @@ function ExtendNetworkIntention::Execute() {
 		
 		st = bsbo.execute();
 		if (st != false) {
-			sw7town.AddStation(st);
+			sw7town.AddStation(AIStation.GetStationID(st));
 			
 			foreach (veh, _ in sw7town.Vehicles) {
 				AIOrder.AppendOrder(veh, st, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
