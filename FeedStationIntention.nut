@@ -6,7 +6,7 @@
 	
 	constructor(_station) {
 		this.Station = _station;
-		this.town = SW7Town(AIStation.GetNearestTown(_station));
+		this.town = TownList.towns.rawget(AIStation.GetNearestTown(_station));
 	}
 	
     /** 
@@ -73,8 +73,8 @@ function FeedStationIntention::Execute() {
 						}
 						
 						executeBuildOrders(boArr);
-						town.AddStation(ebsbo.tile);
-						town.AddStation(cbsbo.tile);
+						town.AddStation(AIStation.GetStationID(ebsbo.tile));
+						town.AddStation(AIStation.GetStationID(cbsbo.tile));
 						
 						if (veh != false) {
 							town.AddVehicle(veh);
