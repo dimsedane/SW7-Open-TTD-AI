@@ -59,12 +59,6 @@ class SW7AI extends AIController
 		}
 	}
 	
-	function ActivateFSDesire();
-	
-	function ActivateERDesire();
-	
-	function ActivateEFNDesire();
-
 	function GenerateFSIntentions();
 	
 	function GenerateERIntentions();
