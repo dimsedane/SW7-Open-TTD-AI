@@ -77,9 +77,7 @@ function SW7AI::BRF() {
 }
 
 function SW7AI::GenerateDesires() {
-	ActivateFSDesire();
-	ActivateERDesire();
-	ActivateEFNDesire();
+	DesireManager.ActivateDesires(BeliefsManager);
 }
 
 // Generates intentions from desires.
@@ -113,49 +111,6 @@ function SW7AI::InitializeState() {
 	desireManager = DesireManager();
 }
 
-function SW7AI::ActivateFSDesire() {
-	local des = (Desire.FEED_STATION);
-	
-	if (BeliefsManager.StationsToFeed.Count() == 0) {
-		DesireManager.Desires.rawget(des).active = false;
-	} else {
-		DesireManager.Desires.rawget(des).active = true;
-
-		foreach (id, town in BeliefsManager.AllTownsList.towns) {
-			if (town.active) {
-				town.setDesire(des, (town.GetPopulation() > 400));
-			}
-		}
-	}
-}
-
-function SW7AI::ActivateERDesire() {
-	if (BeliefsManager.CurrentMoney > BeliefsManager.LoanInterval) {
-		DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active = true;
-	} else {
-		DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active = false;
-	}
-}
-
-function SW7AI::ActivateEFNDesire() {
-	local townsToExtend = false;
-	local des = Desire.EXTEND_FEEDER_NETWORK;
-	
-	foreach (sTown in BeliefsManager.CurrentServicedTownsList) {
-		local popl = sTown.GetPopulation();
-		local stMax = 0.00000001 * popl * popl + 0.001 * popl + 2.25;
-		
-		if (stMax >= (sTown.Stations.Count() + 1)) {
-			sTown.setDesire(des, true);
-			townsToExtend = true;
-		} else {
-			sTown.setDesire(des, false);
-		}
-	}
-	
-	DesireManager.Desires.rawget(des).active = townsToExtend;
-}
-
 function SW7AI::GenerateFSIntentions() {
 	local townsToConsider = {};
 	local feedDes = DesireManager.Desires.rawget(Desire.FEED_STATION);
@@ -170,11 +125,13 @@ function SW7AI::GenerateFSIntentions() {
 		//Add FeedStationIntention
 		foreach (station, _ in BeliefsManager.StationsToFeed) {
 			if (townsToConsider.rawin(AIStation.GetNearestTown(station))) {
+				local t = townsToConsider.rawget(AIStation.GetNearestTown(station));
 				local fsI = FeedStationIntention(station);
 				foreach (Intention in Intentions) {
 					if (Intention instanceof FeedStationIntention) {
-						if (Intention.Station == station) {
+						if (Intention.town.TownId == AIStation.GetNearestTown(station)) {
 							fsI = null;
+							break;
 						}
 					}
 				}
@@ -185,7 +142,6 @@ function SW7AI::GenerateFSIntentions() {
 			}
 		}
 	}
-	//AILog.Info("After intentions: " + Intentions.len());
 }
 
 function SW7AI::GenerateERIntentions() {

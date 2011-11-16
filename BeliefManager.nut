@@ -52,7 +52,7 @@ function BeliefManager::Update() {
 		foreach (station, _ in StationsToFeed) {
 			if (AIStation.GetNearestTown(station) == townid) {
 				town.active = true;
-				break;
+				town.AddStation(station);
 			}
 		}
 	}
