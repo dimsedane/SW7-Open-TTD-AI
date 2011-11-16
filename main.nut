@@ -79,6 +79,7 @@ function SW7AI::Filter() {
 	GenerateFSIntentions();
 	GenerateERIntentions();
 	GenerateEFNIntentions();
+	GenerateAVIntentions();
 }
 
 function SW7AI::Execute() {
@@ -174,4 +175,8 @@ function SW7AI::GenerateEFNIntentions() {
 			}
 		}
 	}
+}
+
+function SW7AI::GenerateAVIntentions() {
+
 }

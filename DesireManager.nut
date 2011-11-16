@@ -8,6 +8,8 @@ class DesireManager {
 		Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active = false;
 		Desires.rawset(Desire.EXTEND_FEEDER_NETWORK, Desire(Desire.EXTEND_FEEDER_NETWORK));
 		Desires.rawget(Desire.EXTEND_FEEDER_NETWORK).active = false;
+		Desires.rawset(Desire.ADD_VEHICLE, Desire(Desire.ADD_VEHICLE));
+		Desires.rawget(Desire.ADD_VEHICLE).active = false;
 	}
 	
 	
@@ -22,12 +24,24 @@ class DesireManager {
 	function ActivateERDesire(bm);
 	
 	function ActivateEFNDesire(bm);
+	
+	function ActivateAVDesire(bm);
 }
 
 function DesireManager::ActivateDesires(bm) {
 	DesireManager.ActivateFSDesire(bm);
 	DesireManager.ActivateERDesire(bm);
 	DesireManager.ActivateEFNDesire(bm);
+}
+
+function DesireManager::ActivateAVDesire(bm) {
+	local des = Desire.ADD_VEHICLE;
+	
+	foreach (townid, sw7town in bm.AllTownsList.towns) {
+		if (sw7town.active) {
+			//Check if we need to add additional vehicles here
+		}
+	}
 }
 
 function DesireManager::ActivateFSDesire(bm) {
@@ -40,7 +54,11 @@ function DesireManager::ActivateFSDesire(bm) {
 
 		foreach (id, town in bm.AllTownsList.towns) {
 			if (town.active) {
-				town.setDesire(des, (town.GetPopulation() > 400));
+				if (!bm.CurrentServicedTownsList.rawin(id)) {
+					town.setDesire(des, (town.GetPopulation() > 400));
+				} else {
+					town.setDesire(des, false);
+				}
 			}
 		}
 	}
@@ -63,6 +81,10 @@ function DesireManager::ActivateEFNDesire(bm) {
 		local popl = sTown.GetPopulation();
 		local stMax = 0.00000001 * popl * popl + 0.001 * popl + 2.25;
 		
+		AILog.Info(stMax + " " + sTown.GetName() + " " + sTown.Stations.Count());
+		foreach (station, _ in sTown.Stations) {
+			AILog.Info(AIStation.GetName(station));
+		}
 		if (stMax >= (sTown.Stations.Count() + 1)) {
 			sTown.setDesire(des, true);
 			townsToExtend = true;

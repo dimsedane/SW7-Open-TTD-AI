@@ -53,6 +53,7 @@ function BeliefManager::Update() {
 			if (AIStation.GetNearestTown(station) == townid) {
 				town.active = true;
 				town.AddStation(station);
+				AILog.Info("Adding " + AIStation.GetName(station) + " to " + town.GetName() + ", total: " + town.Stations.Count());
 			}
 		}
 	}
