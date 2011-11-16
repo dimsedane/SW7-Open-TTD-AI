@@ -55,6 +55,7 @@ function FeedStationIntention::Execute() {
 					
 					foreach (engL, _ in engList) {
 						vbo = VehicleBuildOrder(dbo.location, engL);
+						town.setDepot(dbo.location);
 						if (vbo.test() != null) {
 							break;
 						}

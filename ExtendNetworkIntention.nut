@@ -11,8 +11,8 @@ function ExtendNetworkIntention::Execute() {
 	
 	local stationTiles = [];
 	local options = TileListGenerator.generateFlatRoadTilesNear(sw7town.GetLocation(), searchRadius);
-	foreach (stationLoc, _ in sw7town.Stations) {
-		stationTiles.append(stationLoc);
+	foreach (station, _ in sw7town.Stations) {
+		stationTiles.append(AIStation.GetLocation(station));
 	}
 	
 	options = SW7MEUP.optimize(options, stationTiles);
@@ -27,7 +27,6 @@ function ExtendNetworkIntention::Execute() {
 		st = bsbo.execute();
 		if (st != false) {
 			sw7town.AddStation(AIStation.GetStationID(st));
-			
 			foreach (veh, _ in sw7town.Vehicles) {
 				AIOrder.AppendOrder(veh, st, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
 			}

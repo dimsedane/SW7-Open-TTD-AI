@@ -4,6 +4,7 @@ class SW7Town extends AITown {
 	ActiveDesires = null;
 	Vehicles = null;
 	active = null;
+	Depot = null;
 	
 	constructor(_TownId) {
 		::AITown.constructor();
@@ -13,6 +14,10 @@ class SW7Town extends AITown {
 		active = false;
 		ActiveDesires = {};
 		InitiateDesires();
+	}
+	
+	function setDepot(tile) {
+		Depot = tile;
 	}
 	
 	/**
@@ -51,6 +56,7 @@ class SW7Town extends AITown {
 		ActiveDesires.rawset(Desire.FEED_STATION, Desire(Desire.FEED_STATION));
 		ActiveDesires.rawset(Desire.EXTEND_FEEDER_NETWORK, Desire(Desire.EXTEND_FEEDER_NETWORK));
 		ActiveDesires.rawset(Desire.ECONOMICALLY_RESPONSIBLE, Desire(Desire.ECONOMICALLY_RESPONSIBLE));
+		ActiveDesires.rawset(Desire.ADD_VEHICLE, Desire(Desire.ADD_VEHICLE));
 	}
 	
 	/**

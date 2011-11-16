@@ -11,6 +11,7 @@ require("TileListGenerator.nut");
 require("BuildOrder.nut");
 require("RepayLoanIntention.nut");
 require("ExtendNetworkIntention.nut");
+require("AddVehicleIntention.nut");
 
 class SW7AI extends AIController
 {
@@ -85,7 +86,16 @@ function SW7AI::Filter() {
 function SW7AI::Execute() {
 	if (Intentions.len() > 0) {
 		if (!Intentions[0].Execute()) {
-			AILog.Warning("Failed executing current Intention.");
+			
+			if (Intentions[0] instanceof FeedStationIntention) {
+				AILog.Warning("Failed executing current FSIntention.");
+			} else if (Intentions[0] instanceof ExtendNetworkIntention) {
+				AILog.Warning("Failed executing current ENIntention.");
+			} else if (Intentions[0] instanceof RepayLoanIntention) {
+				AILog.Warning("Failed executing current PLIntention.");
+			} else if (Intentions[0] instanceof AddVehicleIntention) {
+				AILog.Warning("Failed executing current AVIntention.");
+			}
 		} else {
 			if (Intentions[0] instanceof FeedStationIntention) {
 				BeliefsManager.AddServicedTown(Intentions[0].town); //Add the SW7town that matches the serviced town's ID to list of Serviced towns.
@@ -178,5 +188,25 @@ function SW7AI::GenerateEFNIntentions() {
 }
 
 function SW7AI::GenerateAVIntentions() {
-
+	local des = Desire.ADD_VEHICLE;
+	
+	if (DesireManager.Desires.rawget(des).active) {
+		foreach (town in BeliefsManager.CurrentServicedTownsList) {
+			if (town.getDesireState(des)) {
+				local avI = AddVehicleIntention(town);
+				
+				foreach (Intention in Intentions) {
+					if (Intention instanceof AddVehicleIntention) {
+						if (Intention.town.TownId == town) {
+							avI = null;
+						}
+					}
+				}
+				
+				if (avI != null) {
+					Intentions.append(avI);
+				}
+			}
+		}
+	}
 }

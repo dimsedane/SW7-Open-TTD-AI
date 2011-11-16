@@ -37,7 +37,7 @@
 		foreach (tile, _ in list) {
 			if (!AIRoad.IsRoadTile(tile) && (AITile.GetMinHeight(tile) == AITile.GetMaxHeight(tile))) {
 				list.RemoveItem(tile);
-			}
+			} 
 		}
 		
 		return list;

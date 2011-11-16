@@ -21,6 +21,8 @@ class BeliefManager {
 	CurrentMaxLoan = null;
 	LoanInterval = null;
 	
+	LastVehicleCheck = null;
+	
 	constructor() {
 		PaxCargoId = this.getPaxCargoId();
 	}
@@ -53,7 +55,6 @@ function BeliefManager::Update() {
 			if (AIStation.GetNearestTown(station) == townid) {
 				town.active = true;
 				town.AddStation(station);
-				AILog.Info("Adding " + AIStation.GetName(station) + " to " + town.GetName() + ", total: " + town.Stations.Count());
 			}
 		}
 	}

@@ -32,16 +32,50 @@ function DesireManager::ActivateDesires(bm) {
 	DesireManager.ActivateFSDesire(bm);
 	DesireManager.ActivateERDesire(bm);
 	DesireManager.ActivateEFNDesire(bm);
+	DesireManager.ActivateAVDesire(bm);
 }
 
 function DesireManager::ActivateAVDesire(bm) {
 	local des = Desire.ADD_VEHICLE;
+	local activateDes = false;
 	
+	AILog.Info(bm.AllTownsList.towns.len());
 	foreach (townid, sw7town in bm.AllTownsList.towns) {
-		if (sw7town.active) {
-			//Check if we need to add additional vehicles here
+		//Check if we need to add additional vehicles here
+		//Could be done by using Waiting cargo amount for all stations in question? (AIStation.GetCargoWaiting(stationId) vs. AIVehicle.GetCapacity(vehicleId, cargoId)
+		local pax = bm.getPaxCargoId();
+		
+		local waitingCargo = 0;
+		local cargoCapacity = 0;
+		
+		foreach (station, _ in sw7town.Stations) {
+			waitingCargo += AIStation.GetCargoWaiting(station, pax);
+		}
+		
+		foreach (vehicle, _ in sw7town.Vehicles) {
+			cargoCapacity = AIVehicle.GetCapacity(vehicle, pax);
+		}
+		
+		AILog.Info(sw7town.GetName() + ": " + waitingCargo + " " + cargoCapacity);
+		if (waitingCargo > (cargoCapacity * 25)) { //For funs - sæt til 3!
+			local cTick = AIController.GetTick();
+			
+			AILog.Info("Sufficient Waiting cargo.");
+			if (bm.LastVehicleCheck == null) {
+				bm.LastVehicleCheck = cTick;
+				AILog.Info("Desire added.");
+				sw7town.setDesire(des, true);
+				activateDes = true;
+			} else if ((bm.LastVehicleCheck + 74*10) < cTick) {
+				bm.LastVehicleCheck = cTick;
+				AILog.Info("Desire added.");
+				sw7town.setDesire(des, true);
+				activateDes = true;
+			}
 		}
 	}
+	
+	DesireManager.Desires.rawget(Desire.ADD_VEHICLE).active = activateDes;
 }
 
 function DesireManager::ActivateFSDesire(bm) {
@@ -79,12 +113,8 @@ function DesireManager::ActivateEFNDesire(bm) {
 	
 	foreach (sTown in bm.CurrentServicedTownsList) {
 		local popl = sTown.GetPopulation();
-		local stMax = 0.00000001 * popl * popl + 0.001 * popl + 2.25;
+		local stMax = (0.00000001 * popl * popl + 0.001 * popl + 2.25)*2/3;
 		
-		AILog.Info(stMax + " " + sTown.GetName() + " " + sTown.Stations.Count());
-		foreach (station, _ in sTown.Stations) {
-			AILog.Info(AIStation.GetName(station));
-		}
 		if (stMax >= (sTown.Stations.Count() + 1)) {
 			sTown.setDesire(des, true);
 			townsToExtend = true;

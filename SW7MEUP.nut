@@ -6,7 +6,6 @@
 	/**
 	 * Takes a list of tiles for station placement, as well as a list of station tiles.
 	 * Orders the list of options by the cargo production within 3 tiles, as well as the distance to the provided station tiles.
-	 * Tiles too close to existing tiles (currently 3), are removed.
 	 */
 	function optimize(options, stationtiles);
 	
@@ -18,13 +17,35 @@
 
 function SW7MEUP::optimize (options, stationtiles) {
 	foreach (option, val in options) {
-	local cp = AITile.GetCargoProduction(option, SW7AI.BeliefsManager.PaxCargoId, 1, 1, 3);
+		local cp = AITile.GetCargoProduction(option, SW7AI.BeliefsManager.PaxCargoId, 1, 1, 3);
 		local tmpCost = cp;
 		foreach (station in stationtiles) {
-			if (AITile.GetDistanceManhattanToTile(station, option) < 4) {
-				options.RemoveItem(option);
-			} else {
-				tmpCost += (3/(option, AITile.GetDistanceManhattanToTile(station, option)));
+			local tmp = AITile.GetDistanceManhattanToTile(station, option);
+			switch (tmp) {
+				case 0:
+					options.RemoveItem(option);
+					break;
+				case 1:
+					tmpCost -= 3200;
+					break;
+				case 2:
+					tmpCost -= 1600;
+					break;
+				case 3:
+					tmpCost -= 800;
+					break;
+				case 4:
+					tmpCost -= 400;
+					break;
+				case 5:
+					tmpCost -= 200;
+					break;
+				case 6:
+					tmpCost -= 100;
+					break;
+				default:
+					tmpCost += 3/tmp;
+					break;
 			}
 		}
 		options.SetValue(option, tmpCost);
