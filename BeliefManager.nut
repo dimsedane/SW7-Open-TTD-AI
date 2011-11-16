@@ -2,7 +2,7 @@ class BeliefManager {
 	/**
 	 * Towns in the map, ordered by population.
 	 */
-	CurrentTownList = TownList();
+	AllTownsList = TownList();
 	/**
 	 * All towns with a station that is not already fed. (Built from StationsToFeed list)
 	 */
@@ -37,7 +37,7 @@ class BeliefManager {
 }
 
 function BeliefManager::Update() {
-	CurrentTownList.UpdateTownList();
+	AllTownsList.UpdateTownList();
 	
 	CurrentLoan = AICompany.GetLoanAmount(); //Amount currently loaned
 	CurrentMoney = AICompany.GetBankBalance(AICompany.COMPANY_SELF); //Current balance
@@ -47,10 +47,15 @@ function BeliefManager::Update() {
 	StationsToFeed = AIStationList(AIStation.STATION_TRAIN);
 	StationsToFeed.RemoveList(AIStationList(AIStation.STATION_BUS_STOP));
 	
+	foreach (tid, sw7t in AllTownsList) {
+		sw7t.active = false;
+	}
+	
 	foreach (station, _ in StationsToFeed) {
 		local townid = AIStation.GetNearestTown(station);
-		ActiveTownList.rawset(townid, SW7Town(townid));
-		ActiveTownList.rawget(townid).InitiateDesires();
+		sw7t = AllTownsList.rawget(townid);
+		sw7t.active = true;
+		sw7t.InitiateDesires();
 	}
 }
 

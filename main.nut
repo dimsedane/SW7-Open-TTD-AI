@@ -58,6 +58,12 @@ class SW7AI extends AIController
 			Execute();
 		}
 	}
+	
+	function ActivateFSDesire();
+	
+	function ActivateERDesire();
+	
+	function ActivateEFNDesire();
 }
 
 function SW7AI::BRF() {
@@ -65,64 +71,19 @@ function SW7AI::BRF() {
 }
 
 function SW7AI::GenerateDesires() {
-	if (BeliefsManager.StationsToFeed.Count() > 0) {
-		local t = null;
-		local set = false;
-		local des = Desire(Desire.FEED_STATION);
-		DesireManager.Desires.rawget(Desire.FEED_STATION).active = true;
-		
-		foreach (town in BeliefsManager.ActiveTownList) {
-			
-			if (town.GetPopulation() > 400) {
-				town.setDesire(des, true);
-				set = true;
-			} else {
-				town.setDesire(des, false);
-			}
-		}
-		if (!set) DesireManager.Desires.rawget(des).active = false;
-	}
-	
-	if (BeliefsManager.CurrentMoney > BeliefsManager.LoanInterval) {
-		DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active = true;
-	} else {
-		DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active = false;
-	}
-	
-	if (BeliefsManager.CurrentServicedTownsList.len() > 0) {
-		local TownToExtend = false;
-		foreach (town in BeliefsManager.CurrentServicedTownsList) {
-			local popl = town.GetPopulation();
-			local stMax = 0.00000001 * popl * popl + 0.001 * popl + 2.25;
-			local des = Desire(Desire.EXTEND_FEEDER_NETWORK);
-			if (stMax > (town.Stations.Count())) {
-				town.setDesire(des, true);
-				AILog.Info("Desires to extend " + AITown.GetName(town.TownId));
-				TownToExtend = true;
-			} else {
-				town.setDesire(des, false);
-				AILog.Info(AITown.GetName(town.TownId) + " has sufficient amount of stations.");
-			}
-		}
-		if (TownToExtend) DesireManager.Desires.rawget(Desire.EXTEND_FEEDER_NETWORK).active = false;
-	}
+	ActivateFSDesire();
+	ActivateERDesire();
+	ActivateEFNDesire();
 }
 
 // Generates intentions from desires.
 function SW7AI::Filter() {
-	local activeDesires = {};
 	local townsToConsider = {};
 	
-	foreach (desire in DesireManager.Desires) {
-		if (desire.active) {
-			activeDesires.rawset(desire.DesireType, desire);
-		}
-	}
-	
-	if (activeDesires.rawin(Desire.FEED_STATION)) {
-		local feedDes = activeDesires.rawget(Desire.FEED_STATION);
-		foreach (townid, sw7town in BeliefsManager.ActiveTownList) {
-			
+	local feedDes = DesireManager.Desires.rawget(Desire.FEED_STATION);
+	if (feedDes.active) {
+		
+		foreach (townid, sw7town in BeliefsManager.AllTownsList) {
 			if (sw7town.getDesireState(feedDes)) {
 				townsToConsider.rawset(townid, sw7town);
 			}
@@ -142,14 +103,12 @@ function SW7AI::Filter() {
 				
 				if (fsI != null) {
 					Intentions.append(fsI);
-					AILog.Info("Added FSIntention.");
 				}
 			}
 		}
-	} 
+	}
 	
-	if (activeDesires.rawin(Desire.ECONOMICALLY_RESPONSIBLE)) {
-		AILog.Info("Economically responsible desire active");
+	if (DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active) {
 		local alreadyAdded = false;
 		foreach (Intention in Intentions) {
 			if (Intention instanceof RepayLoanIntention) {
@@ -159,14 +118,14 @@ function SW7AI::Filter() {
 		}
 		
 		if (!alreadyAdded) {
-			AILog.Info("Added Econ. intention.");
 			Intentions.append(RepayLoanIntention(BeliefsManager));
 		}
 	}
 	
-	if (activeDesires.rawin(Desire.EXTEND_FEEDER_NETWORK)) {
-		AILog.Info("Extend Feeder network active");
-		local des = activeDesires.rawget(Desire.EXTEND_FEEDER_NETWORK);
+	local des = DesireManager.Desires.rawget(Desire.EXTEND_FEEDER_NETWORK);
+	if (des.active) {
+		AILog.Info("Intentions before EFN: " + Intentions.len());
+		
 		foreach (town in BeliefsManager.CurrentServicedTownsList) {
 			if (town.getDesireState(des)) {
 				local efnI = ExtendNetworkIntention(town);
@@ -179,11 +138,11 @@ function SW7AI::Filter() {
 				}
 				
 				if (efnI != null) {
-					AILog.Info("Added Extend Feeder Intention.");
 					Intentions.append(efnI);
 				}
 			}
 		}
+		AILog.Info("Intentions after EFN: " + Intentions.len());
 	}
 }
 
@@ -209,4 +168,54 @@ function SW7AI::PreInitializeState() {
 //All initializations here!!!
 function SW7AI::InitializeState() {
 	desireManager = DesireManager();
+}
+
+function SW7AI::ActivateFSDesire() {
+	local des = Desire(Desire.FEED_STATION);
+	
+	if (BeliefsManager.StationsToFeed.Count() == 0) {
+		DesireManager.Desires.rawget(des.DesireType).active = false;
+	} else {
+		DesireManager.Desires.rawget(des.DesireType).active = true;
+
+		foreach (sw7Town, _ in BeliefsManager.AllTownsList) {
+			
+			town.setDesire(des, (town.GetPopulation() > 400));
+		}
+	}
+	
+	if (DesireManager.Desires.rawget(des.DesireType).active) {
+		foreach (town in BeliefsManager.ActiveTownList) {
+			AILog.Info(town.getDesireState(des) + " XXX " + town.GetName());
+			AILog.Info(DesireManager.Desires.rawget(des.DesireType).active);
+			AILog.Info(town.ActiveDesires.rawget(des.DesireType).active + " YYY");
+		}
+	}
+}
+
+function SW7AI::ActivateERDesire() {
+	if (BeliefsManager.CurrentMoney > BeliefsManager.LoanInterval) {
+		DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active = true;
+	} else {
+		DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active = false;
+	}
+}
+
+function SW7AI::ActivateEFNDesire() {
+	local set = false;
+	
+	foreach (sTown in BeliefsManager.CurrentServicedTownsList) {
+		local popl = sTown.GetPopulation();
+		local stMax = 0.00000001 * popl * popl + 0.001 * popl + 2.25;
+		local des = Desire(Desire.EXTEND_FEEDER_NETWORK);
+		
+		if (stMax >= (sTown.Stations.Count() + 1)) {
+			sTown.setDesire(des, true);
+			set = true;
+		} else {
+			sTown.setDesire(des, false);
+		}
+	}
+	
+	DesireManager.Desires.rawget(Desire.EXTEND_FEEDER_NETWORK).active = set;
 }

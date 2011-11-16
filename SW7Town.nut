@@ -3,6 +3,7 @@ class SW7Town extends AITown {
 	TownId = null;
 	ActiveDesires = {};
 	Vehicles = null;
+	active = null;
 	
 	constructor(_TownId) {
 		::AITown.constructor();
@@ -10,6 +11,7 @@ class SW7Town extends AITown {
 		TownId = _TownId;
 		Vehicles = AIList();
 		InitiateDesires();
+		active = false;
 	}
 	
 	/**
@@ -37,6 +39,10 @@ class SW7Town extends AITown {
 		return ::AITown.GetPopulation(TownId);
 	}
 	
+	function GetName() {
+		return ::AITown.GetName(TownId);
+	}
+	
 	/**
 	 * Initiate desires for the town. (IE.: Set all desires to false).
 	 */
@@ -54,18 +60,19 @@ class SW7Town extends AITown {
 	}
 	
 	/**
-	 * Get current desire state. If town has the desire active, it is also checked, whether the desire itself is active.
+	 * Get current desire state.
+	 * Global desire is checked if and only if Local desire is active. 
+	 * (IE. If town does not have desire, it is not necessary to check globally).
 	 */
 	function getDesireState(desire) {
-		AILog.Info("Check town desire.");
-		if (ActiveDesires.rawin(desire.DesireType)) {
-			AILog.Info("Desire exists." + typeof(desire.DesireType));
-			if (ActiveDesires.rawget(desire.DesireType).active) {
-				if (DesireManager.Desires.rawin(desire.DesireType)) {
-					return DesireManager.Desires.rawget(desire.DesireType);
-				}
+		if (ActiveDesires.rawin(desire.DesireType) && ActiveDesires.rawget(desire.DesireType).active) {
+			if (DesireManager.Desires.rawin(desire.DesireType)) {
+				return DesireManager.Desires.rawget(desire.DesireType).active;
+			} else {
+				return false;
 			}
+		} else {
+			return false;
 		}
-		return false;
 	}
 }
