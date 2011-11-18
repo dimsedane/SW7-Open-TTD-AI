@@ -39,7 +39,6 @@ function DesireManager::ActivateAVDesire(bm) {
 	local des = Desire.ADD_VEHICLE;
 	local activateDes = false;
 	
-	AILog.Info(bm.AllTownsList.towns.len());
 	foreach (townid, sw7town in bm.AllTownsList.towns) {
 		//Check if we need to add additional vehicles here
 		//Could be done by using Waiting cargo amount for all stations in question? (AIStation.GetCargoWaiting(stationId) vs. AIVehicle.GetCapacity(vehicleId, cargoId)
@@ -53,22 +52,18 @@ function DesireManager::ActivateAVDesire(bm) {
 		}
 		
 		foreach (vehicle, _ in sw7town.Vehicles) {
-			cargoCapacity = AIVehicle.GetCapacity(vehicle, pax);
+			cargoCapacity += AIVehicle.GetCapacity(vehicle, pax);
 		}
 		
-		AILog.Info(sw7town.GetName() + ": " + waitingCargo + " " + cargoCapacity);
-		if (waitingCargo > (cargoCapacity * 25)) { //For funs - sæt til 3!
+		if (waitingCargo > (cargoCapacity * 3)) { //For funs - sæt til 3!
 			local cTick = AIController.GetTick();
 			
-			AILog.Info("Sufficient Waiting cargo.");
 			if (bm.LastVehicleCheck == null) {
 				bm.LastVehicleCheck = cTick;
-				AILog.Info("Desire added.");
 				sw7town.setDesire(des, true);
 				activateDes = true;
-			} else if ((bm.LastVehicleCheck + 74*10) < cTick) {
+			} else if ((bm.LastVehicleCheck + 50) < cTick) {
 				bm.LastVehicleCheck = cTick;
-				AILog.Info("Desire added.");
 				sw7town.setDesire(des, true);
 				activateDes = true;
 			}

@@ -3,14 +3,24 @@
 	
 	constructor(_BeliefsManager) {
 		::Intention.constructor();
-		this.prio = 81; //
 		BeliefsManager = _BeliefsManager;
 	}
 }
 
+function RepayLoanIntention::Test() {
+	return BeliefsManager.CurrentLoan > 0 && BeliefsManager.CurrentMoney > BeliefsManager.LoanInterval;
+}
+
 function RepayLoanIntention::Execute() {
-	if (BeliefsManager.CurrentLoan > 0 && BeliefsManager.CurrentMoney > BeliefsManager.LoanInterval) {
-		AICompany.SetLoanAmount(BeliefsManager.CurrentLoan - BeliefsManager.LoanInterval);
-	}
+	AICompany.SetMinimumLoanAmount(BeliefsManager.CurrentLoan - BeliefsManager.CurrentMoney);
 	return true;
+}
+
+function RepayLoanIntention::Equals(intention) {
+	if (intention instanceof RepayLoanIntention) return true;
+	return false;
+}
+
+function RepayLoanIntention::GetPrio() {
+	return 85;
 }

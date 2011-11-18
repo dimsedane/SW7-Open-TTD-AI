@@ -12,6 +12,7 @@ require("BuildOrder.nut");
 require("RepayLoanIntention.nut");
 require("ExtendNetworkIntention.nut");
 require("AddVehicleIntention.nut");
+require("SW7IntentionList.nut");
 
 class SW7AI extends AIController
 {
@@ -20,7 +21,7 @@ class SW7AI extends AIController
     **************************************************************************/
 	static BeliefsManager = BeliefManager();
 	desireManager = null;
-	Intentions = array(0);
+	Intentions = SW7IntentionList();
 	
 	/**************************************************************************
 	* Other variables
@@ -81,29 +82,34 @@ function SW7AI::Filter() {
 	GenerateERIntentions();
 	GenerateEFNIntentions();
 	GenerateAVIntentions();
+	
+	Intentions.OutruleExpensive();
+	
+	Intentions.Sort();
 }
 
 function SW7AI::Execute() {
-	if (Intentions.len() > 0) {
-		if (!Intentions[0].Execute()) {
+	if (Intentions.Count() > 0) {
+		local intn = Intentions.pop();
+		
+		if (!intn.Execute()) {
 			
-			if (Intentions[0] instanceof FeedStationIntention) {
+			if (intn instanceof FeedStationIntention) {
 				AILog.Warning("Failed executing current FSIntention.");
-			} else if (Intentions[0] instanceof ExtendNetworkIntention) {
+			} else if (intn instanceof ExtendNetworkIntention) {
 				AILog.Warning("Failed executing current ENIntention.");
-			} else if (Intentions[0] instanceof RepayLoanIntention) {
+			} else if (intn instanceof RepayLoanIntention) {
 				AILog.Warning("Failed executing current PLIntention.");
-			} else if (Intentions[0] instanceof AddVehicleIntention) {
+			} else if (intn instanceof AddVehicleIntention) {
 				AILog.Warning("Failed executing current AVIntention.");
 			}
 		} else {
-			if (Intentions[0] instanceof FeedStationIntention) {
-				BeliefsManager.AddServicedTown(Intentions[0].town); //Add the SW7town that matches the serviced town's ID to list of Serviced towns.
+			if (intn instanceof FeedStationIntention) {
+				BeliefsManager.AddServicedTown(intn.town); //Add the SW7town that matches the serviced town's ID to list of Serviced towns.
 			}
 		}
-		Intentions.remove(0);
 	} else {
-		AIController.Sleep(10);
+		AIController.Sleep(30);
 	}
 }
 
@@ -114,6 +120,7 @@ function SW7AI::PreInitializeState() {
 //All initializations here!!!
 function SW7AI::InitializeState() {
 	desireManager = DesireManager();
+	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
 }
 
 function SW7AI::GenerateFSIntentions() {
@@ -130,19 +137,19 @@ function SW7AI::GenerateFSIntentions() {
 		//Add FeedStationIntention
 		foreach (station, _ in BeliefsManager.StationsToFeed) {
 			if (townsToConsider.rawin(AIStation.GetNearestTown(station))) {
-				local t = townsToConsider.rawget(AIStation.GetNearestTown(station));
 				local fsI = FeedStationIntention(station);
-				foreach (Intention in Intentions) {
-					if (Intention instanceof FeedStationIntention) {
-						if (Intention.town.TownId == AIStation.GetNearestTown(station)) {
-							fsI = null;
-							break;
-						}
-					}
-				}
 				
-				if (fsI != null) {
-					Intentions.append(fsI);
+				local exFsI = Intentions.Get(fsI);
+				if (exFsI == null) {
+					if (fsI.Test()) {
+						Intentions.insert(fsI, fsI.GetPrio());
+					}
+				} else {
+					if (exFsI.Test()) {
+						Intentions.Update(exFsI, exFsI.GetPrio());
+					} else {
+						Intentions.remove(exFsI);
+					}
 				}
 			}
 		}
@@ -151,16 +158,19 @@ function SW7AI::GenerateFSIntentions() {
 
 function SW7AI::GenerateERIntentions() {
 	if (DesireManager.Desires.rawget(Desire.ECONOMICALLY_RESPONSIBLE).active) {
-		local alreadyAdded = false;
-		foreach (Intention in Intentions) {
-			if (Intention instanceof RepayLoanIntention) {
-				alreadyAdded = true;
-				break;
-			}
-		}
+		local erI = RepayLoanIntention(BeliefsManager);
 		
-		if (!alreadyAdded) {
-			Intentions.append(RepayLoanIntention(BeliefsManager));
+		local exErI = Intentions.Get(erI);
+		if (exErI == null) {
+			if (erI.Test()) {
+				Intentions.insert(erI, erI.GetPrio());
+			}
+		} else {
+			if (exErI.Test()) {
+				Intentions.Update(exErI, exErI.GetPrio());
+			} else {
+				Intentions.remove(exErI);
+			}
 		}
 	}
 }
@@ -171,16 +181,18 @@ function SW7AI::GenerateEFNIntentions() {
 		foreach (town in BeliefsManager.CurrentServicedTownsList) {
 			if (town.getDesireState(Desire.EXTEND_FEEDER_NETWORK)) {
 				local efnI = ExtendNetworkIntention(town);
-				foreach (Intention in Intentions) {
-					if (Intention instanceof ExtendNetworkIntention) {
-						if (Intention.sw7town == town) {
-							efnI = null;
-						}
-					}
-				}
 				
-				if (efnI != null) {
-					Intentions.append(efnI);
+				local exEfnI = Intentions.Get(efnI);
+				if (exEfnI == null) {
+					if (efnI.Test()) {
+						Intentions.insert(efnI, efnI.GetPrio());
+					}
+				} else {
+					if (exEfnI.Test()) {
+						Intentions.Update(exEfnI, exEfnI.GetPrio());
+					} else {
+						Intentions.remove(exEfnI);
+					}
 				}
 			}
 		}
@@ -195,16 +207,17 @@ function SW7AI::GenerateAVIntentions() {
 			if (town.getDesireState(des)) {
 				local avI = AddVehicleIntention(town);
 				
-				foreach (Intention in Intentions) {
-					if (Intention instanceof AddVehicleIntention) {
-						if (Intention.town.TownId == town) {
-							avI = null;
-						}
+				local exAvI = Intentions.Get(avI);
+				if (exAvI == null) {
+					if (avI.Test()) {
+						Intentions.insert(avI, avI.GetPrio());
 					}
-				}
-				
-				if (avI != null) {
-					Intentions.append(avI);
+				} else {
+					if (exAvI.Test()) {
+						Intentions.Update(exAvI, exAvI.GetPrio());
+					} else {
+						Intentions.remove(exAvI);
+					}
 				}
 			}
 		}

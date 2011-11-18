@@ -5,6 +5,8 @@ class SW7Town extends AITown {
 	Vehicles = null;
 	active = null;
 	Depot = null;
+	lastExtend = null;
+	lastAddVehicle = null;
 	
 	constructor(_TownId) {
 		::AITown.constructor();
@@ -14,6 +16,8 @@ class SW7Town extends AITown {
 		active = false;
 		ActiveDesires = {};
 		InitiateDesires();
+		lastExtend = -1;
+		lastAddVehicle = -1;
 	}
 	
 	function setDepot(tile) {

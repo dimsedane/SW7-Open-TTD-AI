@@ -3,12 +3,12 @@
 	town = null;
 	depottile = null;
 	veh = null;
+	boArr = null;
 	
 	constructor(_station) {
 		::Intention.constructor();
 		this.Station = _station;
 		this.town = TownList.towns.rawget(AIStation.GetNearestTown(_station));
-		this.prio = this.capPop(town.GetPopulation());
 	}
 	
     /** 
@@ -18,93 +18,74 @@
 	function Execute();
 }
 
-function FeedStationIntention::Execute() {
-	local boArr = [];
+function FeedStationIntention::Test() {
+	if (!TownIsBuildable()) return false;
 	
-	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
-	local loc = town.GetLocation();
-	
+	boArr = [];
 	local options = AITileList();
-	local stationLocation = AIStation.GetLocation(Station);
 	
-	if (!TownIsBuildable()) {
-		AILog.Warning("Town is not buildable.");
-		return false;
-	}
-	
-	options = TileListGenerator.generateNear(stationLocation, 10);
+	options = TileListGenerator.generateNear(AIStation.GetLocation(Station), 10);
 	
 	local ebsbo = TestExtensionStationBO(options);
 	
-	if (ebsbo != null) {
-		options = TileListGenerator.generateFlatRoadTilesNear(town.GetLocation(), 5);
-		options = SW7MEUP.optimize(options, [ebsbo.tile]);
-		local cbsbo = TestCentralStationBO(options);
-				
-		if (cbsbo != null) {
-			options = TileListGenerator.generateDepotTiles(town.TownId);
-			local dbo = testDBO(options);
-			
-			if (dbo != null) {
-				local rbo = RoadBuildOrder(dbo.front, ebsbo.tile);
-				if (rbo.test() == null) {
-					rbo = null;
-				}
-				
-				if (rbo != null) {
-					local engList = SW7MEUP.GetRoadVehicle(SW7MEUP.RV_PARAM_HIGH_CARGO_CAPACITY);
-					local vbo = null;
-					
-					foreach (engL, _ in engList) {
-						vbo = VehicleBuildOrder(dbo.location, engL);
-						town.setDepot(dbo.location);
-						if (vbo.test() != null) {
-							break;
-						}
-						vbo = null;
-					}
-					
-					if (vbo != null) {
-						boArr.append(ebsbo);
-						boArr.append(cbsbo);
-						boArr.append(dbo);
-						boArr.append(rbo);
-						boArr.append(vbo);
-						
-						if (getCost(boArr) > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) {
-							AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
-						}
-						
-						executeBuildOrders(boArr);
-						town.AddStation(AIStation.GetStationID(ebsbo.tile));
-						town.AddStation(AIStation.GetStationID(cbsbo.tile));
-						
-						if (veh != false) {
-							town.AddVehicle(veh);
-							AIOrder.AppendOrder(veh, cbsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
-							AIOrder.AppendOrder(veh, ebsbo.tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
-							AIVehicle.StartStopVehicle(veh);
-						
-							return true;
-						} else {
-							AILog.Info("Vehicle not created.");
-						}
-					} else {
-						AILog.Info("Vehicle build order was incorret.");
-					}
-				} else {
-					AILog.Info("Road building creation failed.");
-				}
-			} else {
-				AILog.Info("Depot creation failed.");
-			}
-		} else {
-			AILog.Info("Centre bus station creation failed.");
-		}
-	} else {
-		AILog.Info("Extended bus station creation failed.");
+	if (ebsbo == null) return false;
+	options = TileListGenerator.generateFlatRoadTilesNear(town.GetLocation(), 5);
+	options = SW7MEUP.optimize(options, [ebsbo.tile]);
+	local cbsbo = TestCentralStationBO(options);
+	
+	if (cbsbo == null) return false;
+	options = TileListGenerator.generateDepotTiles(town.TownId);
+	local dbo = testDBO(options);
+	
+	if (dbo == null) return false;
+	local rbo = RoadBuildOrder(dbo.front, ebsbo.tile);
+	if (rbo.test() == null) return false;
+	
+	local engList = SW7MEUP.GetRoadVehicle(SW7MEUP.RV_PARAM_HIGH_CARGO_CAPACITY);
+	local vbo = TestVehicleBO(dbo.location, engList);
+	if (vbo == null) return false;
+	
+	boArr.append(ebsbo);
+	boArr.append(cbsbo);
+	boArr.append(dbo);
+	boArr.append(rbo);
+	boArr.append(vbo);
+	
+	return true;
+}
+
+function FeedStationIntention::Execute() {
+	if (getCost() > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) {
+		AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
 	}
-	return false;
+	
+	executeBuildOrders(boArr);
+	town.AddStation(AIStation.GetStationID(boArr[0].tile));
+	town.AddStation(AIStation.GetStationID(boArr[1].tile));
+	town.setDepot(boArr[2].location);
+	
+	if (veh != false) {
+		town.AddVehicle(veh);
+		AIOrder.AppendOrder(veh, boArr[1].tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+		AIOrder.AppendOrder(veh, boArr[0].tile, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+		AIVehicle.StartStopVehicle(veh);
+	
+		return true;
+	} else {
+		AILog.Info("Vehicle not created.");
+		return false;
+	}
+}
+
+function FeedStationIntention::TestVehicleBO(dptile, engL) {
+	foreach (engL, _ in engL) {
+		local vbo = VehicleBuildOrder(dptile, engL);
+		if (vbo.test() != null) {
+			return vbo;
+		}
+		vbo = null;
+	}
+	return vbo;
 }
 
 function FeedStationIntention::TestExtensionStationBO(tilelist) {
@@ -141,9 +122,9 @@ function FeedStationIntention::testDBO(tilelist) {
 	return null;
 }
 
-function getCost(boarr) {
+function getCost() {
 	local cost = 0;
-	foreach (bo in boarr) {
+	foreach (bo in boArr) {
 		cost += bo.cost;
 	}
 	
@@ -187,5 +168,24 @@ function FeedStationIntention::TownIsBuildable() {
 			AILog.Error("Invalid town!");
 			return false;
 			break;
+	}
+}
+
+function FeedStationIntention::Equals(intention) {
+	if (intention instanceof FeedStationIntention) {
+		if (intention.town.TownId == this.town.TownId) return true;
+	}
+	return false;
+}
+
+function FeedStationIntention::GetPrio() {
+	local ts = town.GetPopulation();
+	
+	if (ts < 1000) {
+		return (ts/100).tointeger();
+	} else if (ts <= 4000) {
+		return (0.025 * ts - 15).tointeger();
+	} else {
+		return 90;
 	}
 }
