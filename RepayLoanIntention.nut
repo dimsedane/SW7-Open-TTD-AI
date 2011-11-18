@@ -2,6 +2,8 @@
 	BeliefsManager = null;
 	
 	constructor(_BeliefsManager) {
+		::Intention.constructor();
+		this.prio = 81; //
 		BeliefsManager = _BeliefsManager;
 	}
 }

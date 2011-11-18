@@ -2,7 +2,9 @@
 	sw7town = null;
 	
 	constructor(sw7town_) {
+		::Intention.constructor();
 		sw7town = sw7town_;
+		this.prio = this.capPop(sw7town.GetPopulation());
 	}
 }
 

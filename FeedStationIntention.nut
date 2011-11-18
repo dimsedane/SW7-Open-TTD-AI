@@ -5,8 +5,10 @@
 	veh = null;
 	
 	constructor(_station) {
+		::Intention.constructor();
 		this.Station = _station;
 		this.town = TownList.towns.rawget(AIStation.GetNearestTown(_station));
+		this.prio = this.capPop(town.GetPopulation());
 	}
 	
     /** 
