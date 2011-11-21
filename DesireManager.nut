@@ -62,7 +62,7 @@ function DesireManager::ActivateAVDesire(bm) {
 				bm.LastVehicleCheck = cTick;
 				sw7town.setDesire(des, true);
 				activateDes = true;
-			} else if ((bm.LastVehicleCheck + 50) < cTick) {
+			} else if ((bm.LastVehicleCheck + 200) < cTick) {
 				bm.LastVehicleCheck = cTick;
 				sw7town.setDesire(des, true);
 				activateDes = true;

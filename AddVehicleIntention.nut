@@ -39,24 +39,19 @@ function AddVehicleIntention::GetPrio() {
 	local ts = town.GetPopulation();
 	local tmpPrio = 0;
 	local updTime = town.lastAddVehicle;
+	local vehCount = town.Vehicles.Count();
 	
-	if (ts < 1000) {
-		tmpPrio = ts*0.001;
-	} else if (ts <= 4000) {
-		tmpPrio = 0.025 * ts - 15;
-	} else {
-		tmpPrio = 90;
-	}
-	tmpPrio = (1/3) * tmpPrio;
-	
-	if (updTime = -1) {
-		return tmpPrio.tointeger();
-	} else {
-		local elapsed = AIController.GetTick() - updTime;
-		if (elapsed > 15000) {
-			return (tmpPrio).tointeger();
+	AILog.Info(town.GetName() + ts + vehCount);
+	if (ts/vehCount > 800) {
+		if (ts < 1000) {
+			tmpPrio = ts*0.001;
+		} else if (ts <= 4000) {
+			tmpPrio = 0.025 * ts - 15;
 		} else {
-			return (tmpPrio * elapsed/15000).tointeger();
+			tmpPrio = 90;
 		}
-	}
+		tmpPrio = (1/5) * tmpPrio;
+		
+		return tmpPrio.tointeger();
+	} else return -1;
 }

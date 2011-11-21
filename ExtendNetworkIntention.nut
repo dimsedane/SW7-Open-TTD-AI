@@ -81,16 +81,16 @@ function ExtendNetworkIntention::GetPrio() {
 		tmpPrio = 90;
 	}
 	
-	tmpPrio = tmpPrio * (1/6);
+	tmpPrio = tmpPrio * (1/10);
 	
 	if (updTime = -1) {
 		return tmpPrio.tointeger();
 	} else {
 		local elapsed = AIController.GetTick() - updTime;
-		if (elapsed > 5000) {
+		if (elapsed > 10000) {
 			return (tmpPrio).tointeger();
 		} else {
-			return (tmpPrio * elapsed/5000).tointeger();
+			return (tmpPrio * elapsed/10000).tointeger();
 		}
 	}
 }
