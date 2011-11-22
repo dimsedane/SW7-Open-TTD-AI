@@ -35,9 +35,10 @@ function ExtendNetworkIntention::Execute() {
 		st = bsbo.execute();
 		if (st != false) {
 			sw7town.AddStation(AIStation.GetStationID(st));
-			foreach (veh, _ in sw7town.Vehicles) {
-				AIOrder.AppendOrder(veh, st, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
-			}
+			AIOrder.AppendOrder(sw7town.Vehicles.Begin(), st, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+//			foreach (veh, _ in sw7town.Vehicles) {
+//				AIOrder.AppendOrder(veh, st, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+//			}
 			sw7town.lastExtend = AIController.GetTick();
 			return true;
 		}

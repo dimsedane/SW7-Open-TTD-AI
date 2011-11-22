@@ -92,21 +92,25 @@ function SW7AI::Execute() {
 	if (Intentions.Count() > 0) {
 		local intn = Intentions.pop();
 		
-		if (!intn.Execute()) {
+		if (intn != null) {
+			if (!intn.Execute()) {
 			
-			if (intn instanceof FeedStationIntention) {
-				AILog.Warning("Failed executing current FSIntention.");
-			} else if (intn instanceof ExtendNetworkIntention) {
-				AILog.Warning("Failed executing current ENIntention.");
-			} else if (intn instanceof RepayLoanIntention) {
-				AILog.Warning("Failed executing current PLIntention.");
-			} else if (intn instanceof AddVehicleIntention) {
-				AILog.Warning("Failed executing current AVIntention.");
+				if (intn instanceof FeedStationIntention) {
+					AILog.Warning("Failed executing current FSIntention.");
+				} else if (intn instanceof ExtendNetworkIntention) {
+					AILog.Warning("Failed executing current ENIntention.");
+				} else if (intn instanceof RepayLoanIntention) {
+					AILog.Warning("Failed executing current PLIntention.");
+				} else if (intn instanceof AddVehicleIntention) {
+					AILog.Warning("Failed executing current AVIntention.");
+				}
+			} else {
+				if (intn instanceof FeedStationIntention) {
+					BeliefsManager.AddServicedTown(intn.town); //Add the SW7town that matches the serviced town's ID to list of Serviced towns.
+				}
 			}
 		} else {
-			if (intn instanceof FeedStationIntention) {
-				BeliefsManager.AddServicedTown(intn.town); //Add the SW7town that matches the serviced town's ID to list of Serviced towns.
-			}
+			AIController.Sleep(30);
 		}
 	} else {
 		AIController.Sleep(30);

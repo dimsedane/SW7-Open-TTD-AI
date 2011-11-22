@@ -21,6 +21,7 @@ function AddVehicleIntention::Execute() {
 	AIVehicle.StartStopVehicle(nVeh);
 	
 	town.lastAddVehicle = AIController.GetTick();
+	town.AddVehicle(nVeh);
 	return true;
 }
 
@@ -38,11 +39,11 @@ function AddVehicleIntention::GetCost() {
 function AddVehicleIntention::GetPrio() {
 	local ts = town.GetPopulation();
 	local tmpPrio = 0;
-	local updTime = town.lastAddVehicle;
 	local vehCount = town.Vehicles.Count();
 	
-	AILog.Info(town.GetName() + ts + vehCount);
-	if (ts/vehCount > 800) {
+	AILog.Info(town.GetName() + " " + ts + " " + vehCount + " " + (ts - (vehCount * 800)));
+	
+	if ((ts - (vehCount * 800)) > 0) {
 		if (ts < 1000) {
 			tmpPrio = ts*0.001;
 		} else if (ts <= 4000) {

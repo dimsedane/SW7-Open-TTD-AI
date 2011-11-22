@@ -57,7 +57,14 @@ function SW7IntentionList::insert(intn, prio) {
 
 function SW7IntentionList::pop() {
 	local out = intns.pop();
-	return out[0];
+	local ret;
+	
+	if (out[1] < 0) {
+		ret = null;
+	} else {
+		ret = out[0];
+	}
+	return ret;
 }
 
 function SW7IntentionList::remove(intention) {
