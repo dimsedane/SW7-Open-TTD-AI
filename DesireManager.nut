@@ -68,18 +68,18 @@ function DesireManager::ActivateAVDesire(bm) {
 			cargoCapacity += AIVehicle.GetCapacity(vehicle, pax);
 		}
 		
-		if (waitingCargo > (cargoCapacity * 3)) { //For funs - sæt til 3!
-			local cTick = AIController.GetTick();
+		if (waitingCargo > (cargoCapacity * 3)) {
+			//local cTick = AIController.GetTick();
 			
-			if (bm.LastVehicleCheck == null) {
-				bm.LastVehicleCheck = cTick;
-				sw7town.setDesire(des, true);
-				activateDes = true;
-			} else if ((bm.LastVehicleCheck + 200) < cTick) {
-				bm.LastVehicleCheck = cTick;
-				sw7town.setDesire(des, true);
-				activateDes = true;
-			}
+			//if (bm.LastVehicleCheck == null || (bm.LastVehicleCheck + 200) < cTick) {
+			//bm.LastVehicleCheck = cTick;
+			sw7town.setDesire(des, true);
+			activateDes = true;
+			//} else {
+				
+			//}
+		} else {
+			sw7town.setDesire(des, false);
 		}
 	}
 	

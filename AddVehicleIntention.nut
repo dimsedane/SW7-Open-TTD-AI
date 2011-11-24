@@ -44,7 +44,7 @@ function AddVehicleIntention::PostExecute() {
 }
 
 function AddVehicleIntention::Equals(intention) {
-	if (intention instanceof FeedStationIntention) {
+	if (intention instanceof AddVehicleIntention) {
 		if (intention.town.TownId == this.town.TownId) return true;
 	}
 	return false;
@@ -58,14 +58,17 @@ function AddVehicleIntention::GetPrio() {
 	local ts = town.GetPopulation();
 	local vehCount = town.Vehicles.Count();
 	local unfed = ts - (vehCount * 800);
-	
-	AILog.Info(town.GetName() + " " + ts + " " + vehCount + " " + unfed);
+	local prio = -1;
 	
 	if (unfed < 0) {
-		return -1;
+		prio = -1;
 	} else if (unfed <= 16000) {
-		return ((unfed * 5)/1000).toInteger();
+		prio = ((unfed * 5)/1000).tointeger();
 	} else {
-		return 90;
+		prio = 90;
 	}
+	
+	AILog.Info(town.GetName() + " " + ts + " " + vehCount + " " + unfed + " " + prio);
+	
+	return prio;
 }

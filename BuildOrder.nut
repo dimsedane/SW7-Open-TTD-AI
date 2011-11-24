@@ -30,36 +30,36 @@ class BusStationBuildOrder extends BuildOrder {
 		this.tile = _location;
 		this.joinStation = _joinStation;
 	}
-}
 
-function BusStationBuildOrder::execute() {
-	if (IsExecutable) {
-		if (AIRoad.BuildDriveThroughRoadStation(tile, front, AIRoad.ROADVEHTYPE_BUS, joinStation)) {
-			return tile;
+	function execute() {
+		if (IsExecutable) {
+			if (AIRoad.BuildDriveThroughRoadStation(tile, front, AIRoad.ROADVEHTYPE_BUS, joinStation)) {
+				return tile;
+			}
 		}
+		return false;
 	}
-	return false;
-}
 
-function BusStationBuildOrder::test() {
-	local test = AITestMode();
-	local accounting = AIAccounting();
-	
-	local built = false;
-	front = tile + AIMap.GetTileIndex(1, 0);
-	
-	built = AIRoad.BuildDriveThroughRoadStation(tile, front, AIRoad.ROADVEHTYPE_BUS, joinStation);
-	if (!built) {
-		front = tile + AIMap.GetTileIndex(0, 1);
+	function test() {
+		local test = AITestMode();
+		local accounting = AIAccounting();
+		
+		local built = false;
+		front = tile + AIMap.GetTileIndex(1, 0);
+		
 		built = AIRoad.BuildDriveThroughRoadStation(tile, front, AIRoad.ROADVEHTYPE_BUS, joinStation);
-	}
+		if (!built) {
+			front = tile + AIMap.GetTileIndex(0, 1);
+			built = AIRoad.BuildDriveThroughRoadStation(tile, front, AIRoad.ROADVEHTYPE_BUS, joinStation);
+		}
 	
-	if (built) {
-		IsExecutable = true;
-		cost = accounting.GetCosts();
-		return true;
+		if (built) {
+			IsExecutable = true;
+			cost = accounting.GetCosts();
+			return true;
+		}
+		return null;
 	}
-	return null;
 }
 
 class VehicleBuildOrder extends BuildOrder {
@@ -70,24 +70,24 @@ class VehicleBuildOrder extends BuildOrder {
 		this.depot = _dpt;
 		this.engine = _eng;
 	}
-}
 
-function VehicleBuildOrder::test() {
-	IsExecutable = true;
-	cost = AIEngine.GetPrice(engine);
-	return true;
-}
-		
-function VehicleBuildOrder::execute() {
-	if (IsExecutable) {
-		local veh = AIVehicle.BuildVehicle(depot, engine);
-		
-		if (AIVehicle.IsValidVehicle(veh)) {
-			return veh;
-		}
+	function test() {
+		IsExecutable = true;
+		cost = AIEngine.GetPrice(engine);
+		return true;
 	}
-	
-	return false;
+			
+	function execute() {
+		if (IsExecutable) {
+			local veh = AIVehicle.BuildVehicle(depot, engine);
+			
+			if (AIVehicle.IsValidVehicle(veh)) {
+				return veh;
+			}
+		}
+		
+		return false;
+	}
 }
 
 class RoadBuildOrder extends BuildOrder {
@@ -99,28 +99,28 @@ class RoadBuildOrder extends BuildOrder {
 		this.start = _start;
 		this.end = _end;
 	}
-}
 
-function RoadBuildOrder::test() {
-	local test = AITestMode();
-	local accounting = AIAccounting();
-	
-	path = SW7Pathfinder.getpath(start, end);
-	if (path == null) {
-		return null;
-	} else {
-		SW7Pathfinder.buildpath(path);
-		IsExecutable = true;
-		cost = accounting.GetCosts();
-		return true;
+	function test() {
+		local test = AITestMode();
+		local accounting = AIAccounting();
+		
+		path = SW7Pathfinder.getpath(start, end);
+		if (path == null) {
+			return null;
+		} else {
+			SW7Pathfinder.buildpath(path);
+			IsExecutable = true;
+			cost = accounting.GetCosts();
+			return true;
+		}
 	}
-}
-	
-function RoadBuildOrder::execute() {
-	if (IsExecutable) {
-		return SW7Pathfinder.buildpath(path);
+		
+	function execute() {
+		if (IsExecutable) {
+			return SW7Pathfinder.buildpath(path);
+		}
+		return false;
 	}
-	return false;
 }
 
 class DepotBuildOrder extends BuildOrder {
@@ -131,31 +131,32 @@ class DepotBuildOrder extends BuildOrder {
 		this.location = _location;
 		this.front = _front;
 	}
-}
 
-function DepotBuildOrder::test() {
-	local test = AITestMode();
-	local accounting = AIAccounting();
-	local depotbuild = false;
-	
-	if (AITile.GetMinHeight(front) == AITile.GetMaxHeight(front) && AITile.IsBuildable(front)) {
-		depotbuild = AIRoad.BuildRoadDepot(location, front);
+
+	function test() {
+		local test = AITestMode();
+		local accounting = AIAccounting();
+		local depotbuild = false;
+		
+		if (AITile.GetMinHeight(front) == AITile.GetMaxHeight(front) && AITile.IsBuildable(front)) {
+			depotbuild = AIRoad.BuildRoadDepot(location, front);
+		}
+		
+		if (depotbuild) {
+			IsExecutable = true;
+			cost = accounting.GetCosts();
+			return true;
+		}
+		
+		return null;
 	}
-	
-	if (depotbuild) {
-		IsExecutable = true;
-		cost = accounting.GetCosts();
-		return true;
+		
+	function execute() {
+		if (IsExecutable) {
+			AIRoad.BuildRoadDepot(location, front);
+			return location;
+		}
+		
+		return false;
 	}
-	
-	return null;
-}
-	
-function DepotBuildOrder::execute() {
-	if (IsExecutable) {
-		AIRoad.BuildRoadDepot(location, front);
-		return location;
-	}
-	
-	return false;
 }

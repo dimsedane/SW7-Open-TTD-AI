@@ -78,13 +78,16 @@ function SW7AI::GenerateDesires() {
 
 // Generates intentions from desires.
 function SW7AI::Filter() {
+	local before = Intentions.Count();
 	GenerateFSIntentions();
 	GenerateERIntentions();
 	GenerateEFNIntentions();
 	GenerateAVIntentions();
 	
-	Intentions.OutruleExpensive();
+	local mid = Intentions.Count();
 	
+	Intentions.OutruleExpensive();
+	AILog.Info("Before Gen: " + before + ", Before outrule: " + mid + ", After:" + Intentions.Count());
 	Intentions.Sort();
 }
 
@@ -94,7 +97,6 @@ function SW7AI::Execute() {
 		
 		if (intn != null) {
 			if (!intn.Execute()) {
-			
 				if (intn instanceof FeedStationIntention) {
 					AILog.Warning("Failed executing current FSIntention.");
 				} else if (intn instanceof ExtendNetworkIntention) {
@@ -205,8 +207,10 @@ function SW7AI::GenerateAVIntentions() {
 	local des = Desire.ADD_VEHICLE;
 	
 	if (DesireManager.Desires.rawget(des).active) {
+		AILog.Info(BeliefsManager.CurrentServicedTownsList.len() + " towns serviced.");
 		foreach (town in BeliefsManager.CurrentServicedTownsList) {
 			if (town.getDesireState(des)) {
+				AILog.Info("Creating Intention for " + town.GetName());
 				local avI = AddVehicleIntention(town);
 				
 				local exAvI = Intentions.Get(avI);
