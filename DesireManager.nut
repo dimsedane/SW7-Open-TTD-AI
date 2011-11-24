@@ -12,7 +12,10 @@ class DesireManager {
 		Desires.rawget(Desire.ADD_VEHICLE).active = false;
 	}
 	
-	
+	/**
+	 * Activate Desires.
+	 * @param BeliefManager bm Instance of a BeliefManager.
+	 */
 	function ActivateDesires(bm);
 	
 	/**
@@ -21,10 +24,22 @@ class DesireManager {
 	 */
 	function ActivateFSDesire(bm);
 	
+	/**
+	 * Activate global Economically Responsible Desire.
+	 * @param BeliefManager bm Instance of BeliefManager
+	 */
 	function ActivateERDesire(bm);
 	
+	/**
+	 * Activate Extend Feeder Network Desire.
+	 * @param BeliefManager bm Instance of BeliefManager
+	 */
 	function ActivateEFNDesire(bm);
 	
+	/**
+	 * Activate Add Vehicle Desire.
+	 * @param BeliefManager bm Instance of BeliefManager
+	 */
 	function ActivateAVDesire(bm);
 }
 
@@ -40,8 +55,6 @@ function DesireManager::ActivateAVDesire(bm) {
 	local activateDes = false;
 	
 	foreach (townid, sw7town in bm.AllTownsList.towns) {
-		//Check if we need to add additional vehicles here
-		//Could be done by using Waiting cargo amount for all stations in question? (AIStation.GetCargoWaiting(stationId) vs. AIVehicle.GetCapacity(vehicleId, cargoId)
 		local pax = bm.getPaxCargoId();
 		
 		local waitingCargo = 0;

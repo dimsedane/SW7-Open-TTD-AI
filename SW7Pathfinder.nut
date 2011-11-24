@@ -5,6 +5,9 @@ class SW7Pathfinder {
 	 */
 	function connected(tile_id_a, tile_id_b);
 	
+	/**
+	 * Connect the Two provided tiles.
+	 */
 	function connect(tile_id_a, tile_id_b); 
 }
 

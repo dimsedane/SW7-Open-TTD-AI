@@ -1,4 +1,7 @@
 ﻿class TileListGenerator {
+	/**
+	 * Generate tiles around the provided tile, in a radius of radius.
+	 */
 	function generateNear(tile, radius) {
 		local list = AITileList();
 	
@@ -31,6 +34,9 @@
 		return list;
 	}
 	
+	/**
+	 * Generate tiles that are guaranteed to be flat and road tiles near tile with radius of radius.
+	 */
 	function generateFlatRoadTilesNear(tile, radius) {
 		local list = TileListGenerator.generateNear(tile, radius);
 		
@@ -43,6 +49,9 @@
 		return list;
 	}
 	
+	/**
+	 * Generate tiles able for depot placement in town.
+	 */
 	function generateDepotTiles(town) {
 		local depottiles = AITileList();
 		local i = 0;

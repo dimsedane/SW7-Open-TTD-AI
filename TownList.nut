@@ -1,8 +1,16 @@
 class TownList {
 	towns = {};
 	
+	/**
+	 * Get all towns
+	 */
 	function loadTowns();
 	
+	/**
+	 * Write the townList, if not already written.
+	 * Currently, nothing is done if the List is not empty.
+	 * (Note that the list is NOT sorted by population, so it is not a problem.)
+	 */
 	function UpdateTownList();
 }
 

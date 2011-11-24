@@ -20,6 +20,9 @@ class SW7Town extends AITown {
 		lastAddVehicle = -1;
 	}
 	
+	/**
+	 * Set the depot of the town.
+	 */
 	function setDepot(tile) {
 		Depot = tile;
 	}
@@ -31,6 +34,9 @@ class SW7Town extends AITown {
 		Stations.AddItem(Station,0);
 	}
 	
+	/**
+	 * Add a Vehicle to the list of Vehicles of the town.
+	 */
 	function AddVehicle(Vehicle) {
 		Vehicles.AddItem(Vehicle, 0);
 	}
@@ -49,6 +55,9 @@ class SW7Town extends AITown {
 		return ::AITown.GetPopulation(TownId);
 	}
 	
+	/**
+	 * Wrapper for retrieving town name.
+	 */
 	function GetName() {
 		return ::AITown.GetName(TownId);
 	}
