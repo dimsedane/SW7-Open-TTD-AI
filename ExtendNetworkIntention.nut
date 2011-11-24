@@ -46,6 +46,10 @@ function ExtendNetworkIntention::Execute() {
 	return false;
 }
 
+function ExtendNetworkIntention::PostExecute() {
+	return true;
+}
+
 function ExtendNetworkIntention::TestBusStationBO(tilelist) {
 	local bsbo;
 	foreach (tile, _ in tilelist) {

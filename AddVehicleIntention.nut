@@ -1,6 +1,17 @@
 class AddVehicleIntention extends Intention {
+	/**
+	 * The sw7Town to add a vehicle to.
+	 */
 	town = null;
+	/**
+	 * The vehicle to clone
+	 */
 	veh = null;
+	/**
+	 * New vehicle.
+	 */
+	nVeh = null;
+	
 	function constructor(sw7town) {
 		::Intention.constructor();
 		town = sw7town;
@@ -17,9 +28,16 @@ function AddVehicleIntention::Execute() {
 	if (GetCost() > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) {
 		AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
 	}
-	local nVeh = AIVehicle.CloneVehicle(town.Depot, veh, true);
+	nVeh = AIVehicle.CloneVehicle(town.Depot, veh, true);
+	
+	if (!AIVehicle.IsValidVehicle(nVeh)) return false;
+	
 	AIVehicle.StartStopVehicle(nVeh);
 	
+	return true;
+}
+
+function AddVehicleIntention::PostExecute() {
 	town.lastAddVehicle = AIController.GetTick();
 	town.AddVehicle(nVeh);
 	return true;
@@ -38,21 +56,16 @@ function AddVehicleIntention::GetCost() {
 
 function AddVehicleIntention::GetPrio() {
 	local ts = town.GetPopulation();
-	local tmpPrio = 0;
 	local vehCount = town.Vehicles.Count();
+	local unfed = ts - (vehCount * 800);
 	
-	AILog.Info(town.GetName() + " " + ts + " " + vehCount + " " + (ts - (vehCount * 800)));
+	AILog.Info(town.GetName() + " " + ts + " " + vehCount + " " + unfed);
 	
-	if ((ts - (vehCount * 800)) > 0) {
-		if (ts < 1000) {
-			tmpPrio = ts*0.001;
-		} else if (ts <= 4000) {
-			tmpPrio = 0.025 * ts - 15;
-		} else {
-			tmpPrio = 90;
-		}
-		tmpPrio = (1/5) * tmpPrio;
-		
-		return tmpPrio.tointeger();
-	} else return -1;
+	if (unfed < 0) {
+		return -1;
+	} else if (unfed <= 16000) {
+		return ((unfed * 5)/1000).toInteger();
+	} else {
+		return 90;
+	}
 }

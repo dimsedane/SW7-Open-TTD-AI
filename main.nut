@@ -105,9 +105,7 @@ function SW7AI::Execute() {
 					AILog.Warning("Failed executing current AVIntention.");
 				}
 			} else {
-				if (intn instanceof FeedStationIntention) {
-					BeliefsManager.AddServicedTown(intn.town); //Add the SW7town that matches the serviced town's ID to list of Serviced towns.
-				}
+				intn.PostExecute();
 			}
 		} else {
 			AIController.Sleep(30);

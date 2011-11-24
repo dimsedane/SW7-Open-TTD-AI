@@ -77,6 +77,11 @@ function FeedStationIntention::Execute() {
 	}
 }
 
+function FeedStationIntention::PostExecute() {
+	BeliefManager.AddServicedTown(town);
+	return true;
+}
+
 function FeedStationIntention::TestVehicleBO(dptile, engL) {
 	foreach (engL, _ in engL) {
 		local vbo = VehicleBuildOrder(dptile, engL);

@@ -16,6 +16,10 @@ function RepayLoanIntention::Execute() {
 	return true;
 }
 
+function RepayLoanIntention::PostExecute() {
+	return true;
+}
+
 function RepayLoanIntention::Equals(intention) {
 	if (intention instanceof RepayLoanIntention) return true;
 	return false;
