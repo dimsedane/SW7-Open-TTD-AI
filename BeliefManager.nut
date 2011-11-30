@@ -46,7 +46,7 @@ function BeliefManager::Update() {
 	CurrentMaxLoan = AICompany.GetMaxLoanAmount(); //Max loan
 	LoanInterval = AICompany.GetLoanInterval();
 	
-	StationsToFeed = AIStationList(AIStation.STATION_TRAIN);
+	StationsToFeed = AIStationList(AIStation.STATION_ANY);
 	StationsToFeed.RemoveList(AIStationList(AIStation.STATION_BUS_STOP));
 	
 	foreach (townid, town in AllTownsList.towns) {
