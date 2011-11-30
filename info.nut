@@ -5,7 +5,7 @@ class SW7AI extends AIInfo
     function GetDescription()   { return "A bus network builder"; }
     function GetVersion()       { return 1; }
     function MinVersionToLoad() { return 1; }
-    function GetDate()          { return "2011-09-12"; }
+    function GetDate()          { return "2011-11-30"; }
     function GetShortName()     { return "SW7A"; }
     function CreateInstance()   { return "SW7AI"; }
     function GetAPIVersion()    { return "1.2"; }
